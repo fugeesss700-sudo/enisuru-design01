@@ -1807,18 +1807,14 @@ async function submitOrder(){
   const interpretation=document.getElementById('interpText')?document.getElementById('interpText').textContent:'';
   const color=COLOR_PALETTE[selColorIdx];
 
-  // 選択されたプレビュー画像（変換後）
-  const selectedPhoto=uploadedPhotos[selectedPreviewIdx];
-  const previewBase64=selectedPhoto?.preview
-    ?(selectedPhoto.preview.replace(/^data:image\/[a-z]+;base64,/,''))
-    :'';
-
-  const payload={
+  // ① submitOrder: テキスト情報のみ送信（画像はsavePhotosで別送）
+  const textPayload={
     action:'submitOrder',
     userName,email,phone,zip,address,message,
     q1:dq('q1'),q2:dq('q2'),
     isGift:!!isGift,giftTo,
     usecase,
+    usecaseLabel: usecase==='gift'?'大切な人への贈り物として':'自分のために',
     mode: selectedMode===1?'静かな一言の作品':selectedMode===2?'言葉のない作品':'物語が宿る作品',
     sku:selectedSku,
     dq1:dq('dq1'),dq2:dq('dq2'),dq3:dq('dq3'),dq4:dq('dq4'),dq5:dq('dq5'),
@@ -1832,8 +1828,6 @@ async function submitOrder(){
     descr:document.getElementById('editDescr')?document.getElementById('editDescr').value.trim():'',
     colorName:color?color.name:'',colorHex:color?color.hex:'',colorNo:color?color.no:'',
     orientation:orient||'',
-    photoBase64:(photoBlobUrl&&photoBlobUrl.indexOf('data:')===0)?photoBlobUrl.replace(/^data:image\/[a-z]+;base64,/,''):'',
-    previewBase64,
     submittedAt:new Date().toISOString()
   };
 
@@ -1841,7 +1835,7 @@ async function submitOrder(){
     const resp=await fetch(endpoint,{
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(payload),
+      body:JSON.stringify(textPayload),
       redirect:'follow'
     });
     if(!resp.ok)throw new Error('HTTP '+resp.status);
@@ -1849,11 +1843,36 @@ async function submitOrder(){
     if(!result.success&&!result.ok)throw new Error(result.error||'送信に失敗しました');
 
     // 注文番号を表示
-    if(result.orderId){
+    const orderId=result.orderId||'';
+    if(orderId){
       const el=document.getElementById('orderIdDisplay');
-      if(el)el.textContent=result.orderId;
+      if(el)el.textContent=orderId;
       const blk=document.getElementById('orderIdBlock');
       if(blk)blk.style.display='block';
+    }
+
+    // ② savePhotos: 元画像とプレビューをバックグラウンドで送信
+    //    photoBase64 は selectedPhoto.data（変換前の元画像）を使う
+    //    （photoBlobUrl は preview を指している場合があるため使用しない）
+    const selectedPhoto=uploadedPhotos[selectedPreviewIdx];
+    const photoBase64=selectedPhoto?.data
+      ?(selectedPhoto.data.replace(/^data:image\/[a-z]+;base64,/,''))
+      :'';
+    const previewBase64=selectedPhoto?.preview
+      ?(selectedPhoto.preview.replace(/^data:image\/[a-z]+;base64,/,''))
+      :'';
+
+    if(orderId&&(photoBase64||previewBase64)){
+      const photoPayload={action:'savePhotos',orderId,photoBase64,previewBase64};
+      // fire-and-forget（画像アップロード失敗しても画面遷移は止めない）
+      fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify(photoPayload),
+        redirect:'follow'
+      }).then(r=>r.json()).then(r=>{
+        console.log('[savePhotos]', r.success?'✅ 画像保存完了':'⚠ 画像保存失敗', r);
+      }).catch(e=>console.warn('[savePhotos] 通信エラー:', e.message));
     }
 
     // Shopify Cart Permalink にリダイレクト
