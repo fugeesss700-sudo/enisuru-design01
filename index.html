@@ -1246,14 +1246,56 @@ async function goToPreview(){
   if(!name){alert('お名前を入力してください。');return;}
   const filled=uploadedPhotos.map((p,i)=>p&&p.data?i:-1).filter(i=>i>=0);
   if(!filled.length){alert('写真を1枚以上アップロードしてください。');return;}
-  // Wait for any processing to finish
-  while(uploadedPhotos.some(p=>p&&p.status==='processing')){
-    await new Promise(r=>setTimeout(r,200));
+
+  // ローディング状態に切り替え
+  const btn=document.getElementById('s1NextBtn');
+  btn.disabled=true;
+  btn.textContent='変換中...';
+  showS1Converting(true);
+
+  try{
+    // Wait for any processing to finish
+    while(uploadedPhotos.some(p=>p&&p.status==='processing')){
+      await new Promise(r=>setTimeout(r,200));
+    }
+    buildPreviewsGrid(true); // fresh load → reset selection
+    // Auto-detect orientation from first photo's preview/raw
+    await autoDetectOrient();
+    go(1.5,1);
+  }finally{
+    showS1Converting(false);
+    btn.disabled=false;
+    btn.textContent='次に進む（プレビューを生成）';
   }
-  buildPreviewsGrid(true); // fresh load → reset selection
-  // Auto-detect orientation from first photo's preview/raw
-  await autoDetectOrient();
-  go(1.5,1);
+}
+
+// S1変換中オーバーレイの表示・非表示
+function showS1Converting(show){
+  let el=document.getElementById('s1ConvertOverlay');
+  if(!el){
+    el=document.createElement('div');
+    el.id='s1ConvertOverlay';
+    el.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(245,242,235,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;';
+    el.innerHTML=`
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:44px;">
+        <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s 0s ease-in-out infinite alternate;height:20px;"></div>
+        <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s .1s ease-in-out infinite alternate;height:32px;"></div>
+        <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s .2s ease-in-out infinite alternate;height:44px;"></div>
+        <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s .3s ease-in-out infinite alternate;height:32px;"></div>
+        <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s .4s ease-in-out infinite alternate;height:20px;"></div>
+      </div>
+      <div style="font-size:14px;color:var(--ink-mid);letter-spacing:0.08em;text-align:center;line-height:1.9;">
+        仮の下絵づくりをしています。<br>
+        <span style="font-size:12px;color:var(--ink-hint);">30秒〜1分ほどかかります。<br>このままお待ちください。</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-hint);text-align:center;max-width:280px;line-height:1.85;padding:12px 16px;background:var(--gold-pale);border-radius:2px;border:0.5px solid var(--gold-border);">
+        ※ これは自動生成のプレビューです。<br>
+        実際の作品は職人が一点ずつ丁寧に<br>
+        手仕上げいたします。
+      </div>`;
+    document.body.appendChild(el);
+  }
+  el.style.display=show?'flex':'none';
 }
 
 // プレビュー拡大モーダル
