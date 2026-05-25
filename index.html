@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>enisuru — 想いを形に</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F2EB;--cream-dark:#EDE9DF;--ink:#1C1B18;--ink-mid:#3D3C38;--ink-light:#6B6A65;--ink-hint:#A8A69F;--gold:#B8963E;--gold-pale:#F7F0DC;--gold-border:#E2D09A;--green-deep:#1A4A3A;--green-mid:#2D6B56;--green-light:#C8DED6;--green-pale:#ECF4F0;--border:rgba(28,27,24,0.10);--border-mid:rgba(28,27,24,0.18);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;padding:52px 20px 120px;}
+.serif{font-family:'Cormorant Garamond','Yu Mincho','游明朝','Hiragino Mincho ProN',serif;}
+.mincho{font-family:'Shippori Mincho','Yu Mincho','游明朝','Hiragino Mincho ProN',serif;}
+.wrap{max-width:600px;margin:0 auto;}
+.logo-area{text-align:center;margin-bottom:60px;}
+.logo-img{display:block;height:64px;width:auto;margin:0 auto 4px;opacity:0.92;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;letter-spacing:0.4em;color:var(--green-deep);}
+.logo-tagline{font-size:11.5px;color:var(--ink-light);margin-top:10px;letter-spacing:0.16em;}
+.logo-rule{width:36px;height:1px;background:var(--gold);margin:14px auto 0;}
+.steps{display:flex;align-items:center;margin-bottom:8px;}
+.sd{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:12px;flex-shrink:0;transition:all .4s;border:0.5px solid var(--border-mid);color:var(--ink-hint);}
+.sd.done{background:var(--green-mid);border-color:var(--green-mid);color:#fff;}
+.sd.active{background:var(--green-deep);border-color:var(--green-deep);color:#fff;}
+.sl{flex:1;height:1px;background:var(--border);transition:background .4s;}
+.sl.done{background:var(--green-mid);}
+.step-lbs{display:flex;justify-content:space-between;margin-top:6px;margin-bottom:48px;padding:0 3px;}
+.slb{font-size:10px;color:var(--ink-hint);text-align:center;width:28px;}
+.screen{display:none;}
+.screen.on{display:block;animation:rise .6s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border-radius:3px;border:0.5px solid var(--border);padding:40px 36px;margin-bottom:16px;}
+.card-eyebrow{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.card-greeting{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:var(--ink);line-height:1.35;margin-bottom:14px;}
+.card-body{font-size:13.5px;color:var(--ink-light);line-height:1.85;margin-bottom:32px;}
+.divider{width:100%;height:1px;background:var(--border);margin:28px 0;}
+.field{margin-bottom:26px;}
+.fl{display:block;font-size:10px;letter-spacing:0.14em;color:var(--ink-hint);text-transform:uppercase;margin-bottom:6px;}
+.fl-jp{display:block;font-size:12px;color:var(--ink-mid);font-weight:500;margin-bottom:4px;}
+.field-note{font-size:12px;color:var(--ink-light);line-height:1.75;margin-bottom:6px;padding:0;background:transparent;border:none;}
+.field-note strong{color:var(--ink-mid);font-weight:500;}
+.field-example{font-size:11.5px;color:var(--ink-hint);margin-top:6px;line-height:1.6;font-style:italic;}
+input[type=text],input[type=url],textarea{width:100%;padding:12px 14px;border:0.5px solid var(--border-mid);border-radius:2px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--cream);line-height:1.6;resize:vertical;appearance:none;transition:border-color .2s,background .2s;}
+input:focus,textarea:focus{outline:none;border-color:var(--green-mid);background:#fff;}
+textarea{min-height:78px;}
+.sub-note{font-size:11.5px;color:var(--ink-hint);margin-top:6px;line-height:1.6;}
+.toggle-row{display:flex;gap:8px;}
+.tb{flex:1;padding:11px 8px;border:0.5px solid var(--border-mid);border-radius:2px;background:var(--cream);font-size:13px;font-family:inherit;cursor:pointer;text-align:center;transition:all .25s;color:var(--ink-light);}
+.tb.sel{background:var(--green-pale);border-color:var(--green-mid);color:var(--green-deep);}
+.orient-wrap{display:flex;gap:12px;margin-top:10px;}
+.op{flex:1;border:0.5px solid var(--border-mid);border-radius:2px;padding:18px 10px 14px;cursor:pointer;text-align:center;background:var(--cream);transition:all .25s;}
+.op.sel{background:var(--green-pale);border-color:var(--green-mid);}
+.op-rect{margin:0 auto 10px;background:var(--ink-hint);border-radius:1px;transition:background .25s;}
+.op.sel .op-rect{background:var(--green-mid);}
+.op-label{font-size:12px;color:var(--ink-light);}
+.op.sel .op-label{color:var(--green-deep);}
+.photo-drop{width:100%;height:190px;border:0.5px dashed var(--border-mid);border-radius:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--cream-dark);margin-bottom:10px;transition:border-color .2s;flex-direction:column;gap:6px;}
+.photo-drop:hover{border-color:var(--green-mid);}
+.photo-drop img{width:100%;height:100%;object-fit:cover;}
+.photo-drop-label{font-size:12px;color:var(--ink-hint);}
+.photo-drop-sub{font-size:11px;color:var(--ink-hint);opacity:.7;}
+.deep-toggle{display:flex;align-items:center;cursor:pointer;margin-top:24px;padding:16px 18px;border:0.5px solid var(--border-mid);border-radius:2px;background:var(--cream-dark);transition:all .25s;}
+.deep-toggle:hover{border-color:var(--green-mid);background:#fff;}
+.deep-toggle.open{border-color:var(--green-mid);background:#fff;}
+.dt-main{flex:1;}
+.dt-label{font-size:13px;color:var(--green-deep);letter-spacing:0.04em;font-weight:500;}
+.dt-action{display:flex;align-items:center;gap:6px;margin-left:12px;flex-shrink:0;padding:6px 12px;border:0.5px solid var(--green-mid);border-radius:2px;background:#fff;transition:all .25s;}
+.deep-toggle:hover .dt-action,.deep-toggle.open .dt-action{background:var(--green-pale);}
+.dt-action-text{font-size:11px;color:var(--green-deep);letter-spacing:0.08em;font-weight:500;}
+.dt-chevron{font-size:9px;color:var(--green-deep);transition:transform .3s;}
+.dt-chevron.open{transform:rotate(180deg);}
+.deep-intro{font-size:11.5px;color:var(--ink-light);line-height:1.7;margin-top:4px;padding-left:0;}
+.deep-qs{display:none;}
+.deep-qs.show{display:block;padding-top:16px;animation:rise .4s ease both;}
+.dq{margin-bottom:20px;}
+.dq-cat{font-size:9.5px;letter-spacing:0.14em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:4px;}
+.dq-q{font-size:13px;color:var(--ink-mid);line-height:1.6;margin-bottom:8px;}
+.btn{display:block;width:100%;padding:14px;font-size:13px;font-family:inherit;cursor:pointer;border:none;border-radius:2px;letter-spacing:0.08em;transition:all .25s;}
+.btn-p{background:var(--green-deep);color:#fff;}
+.btn-p:hover{background:var(--green-mid);}
+.btn-p:disabled{background:var(--ink-hint);cursor:not-allowed;opacity:0.6;}
+.btn-p:disabled:hover{background:var(--ink-hint);}
+.btn-o{background:transparent;color:var(--ink-light);border:0.5px solid var(--border-mid);}
+.btn-o:hover{border-color:var(--green-deep);color:var(--green-deep);}
+.btn-row{display:flex;gap:10px;}
+.btn-row .btn{flex:1;}
+.load-bars{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:44px;margin-bottom:32px;}
+.lb{width:2px;background:var(--green-mid);border-radius:1px;}
+.lb:nth-child(1){animation:bar .9s .0s ease-in-out infinite alternate;height:20px;}
+.lb:nth-child(2){animation:bar .9s .1s ease-in-out infinite alternate;height:32px;}
+.lb:nth-child(3){animation:bar .9s .2s ease-in-out infinite alternate;height:44px;}
+.lb:nth-child(4){animation:bar .9s .3s ease-in-out infinite alternate;height:32px;}
+.lb:nth-child(5){animation:bar .9s .4s ease-in-out infinite alternate;height:20px;}
+@keyframes bar{to{opacity:.25;transform:scaleY(0.3);}}
+.loading-msg{font-size:12.5px;color:var(--ink-hint);letter-spacing:0.1em;line-height:1.8;}
+.interp-card{background:#fff;border:0.5px solid var(--border);border-radius:3px;padding:44px 38px;margin-bottom:24px;position:relative;overflow:hidden;}
+.interp-card::before{content:'"';font-family:'Cormorant Garamond',serif;font-size:100px;font-weight:300;color:var(--gold-pale);position:absolute;top:10px;left:22px;line-height:1;pointer-events:none;z-index:0;}
+.interp-from{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;margin-bottom:22px;position:relative;z-index:1;}
+.interp-text{font-size:14.5px;color:var(--ink-mid);line-height:2.1;white-space:pre-wrap;position:relative;z-index:1;}
+.cands{display:grid;gap:10px;margin-bottom:6px;}
+.cand{border:0.5px solid var(--border-mid);border-radius:2px;padding:26px 24px;cursor:pointer;transition:all .25s;background:#fff;}
+.cand:hover{border-color:var(--green-mid);background:var(--green-pale);}
+.cand.sel{border-color:var(--green-deep);background:var(--green-pale);}
+.cand-type{font-size:9.5px;letter-spacing:0.15em;color:var(--ink-hint);text-transform:uppercase;margin-bottom:10px;}
+.cand.sel .cand-type{color:var(--green-mid);}
+.cand-title{font-family:'Shippori Mincho','Yu Mincho','游明朝',serif;font-size:20px;font-weight:500;color:var(--ink);margin-bottom:12px;line-height:1.45;word-break:break-word;white-space:normal;}
+.cand-desc{font-size:13px;color:var(--ink-light);line-height:1.9;}
+.cand-sub{font-size:11.5px;color:var(--ink-hint);margin-top:10px;line-height:1.7;font-style:italic;}
+.edit-section{margin-top:28px;padding-top:28px;border-top:0.5px solid var(--border);animation:rise .4s ease both;}
+.edit-intro{font-size:13px;color:var(--ink-mid);line-height:1.85;margin-bottom:24px;background:var(--gold-pale);padding:14px 16px;border-radius:2px;border:0.5px solid var(--gold-border);}
+.edit-label{font-size:10px;letter-spacing:0.12em;color:var(--ink-hint);text-transform:uppercase;margin-bottom:4px;}
+.char-count{font-size:11px;color:var(--ink-hint);text-align:right;margin-top:5px;}
+.err{background:#FDF0EE;border:0.5px solid #DDA898;border-radius:2px;padding:12px 14px;font-size:12px;color:#7A3020;line-height:1.6;margin-top:12px;display:none;}
+.impression-note{background:var(--gold-pale);border:0.5px solid var(--gold-border);border-radius:2px;padding:16px 18px;margin-bottom:20px;font-size:12.5px;color:var(--ink-mid);line-height:1.85;}
+.impression-note strong{color:var(--ink);font-weight:500;}
+.final-outer{border:0.5px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.fc-photo-wrap{width:100%;position:relative;height:0;overflow:hidden;background:var(--cream-dark);}
+.fc-photo-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
+.fc-caption-area{padding:48px 40px 36px;background:#EADAC8;font-family:'Shippori Mincho','Yu Mincho','游明朝','Hiragino Mincho ProN',serif;transition:background .3s;position:relative;}
+.fc-title{font-family:'Shippori Mincho','Yu Mincho','游明朝','Hiragino Mincho ProN',serif;font-size:27px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:14px;letter-spacing:0.02em;}
+.fc-meta{margin-bottom:16px;}
+.fc-meta-line{font-size:11.5px;color:var(--ink-mid);line-height:1.95;font-weight:400;}
+.fc-rule-thin{width:100%;height:0.5px;background:rgba(28,27,24,0.22);margin:14px 0 18px;}
+.fc-body{font-size:11.5px;color:var(--ink-mid);line-height:2.0;white-space:pre-wrap;margin-bottom:18px;font-weight:400;letter-spacing:0.02em;}
+.fc-desc{font-size:10.5px;color:var(--ink-light);line-height:1.7;font-style:italic;}
+.fc-foot{margin-top:32px;text-align:right;}
+.fc-logo-img{display:inline-block;height:26px;opacity:0.32;}
+.color-picker-wrap{background:#fff;border:0.5px solid var(--border);border-radius:3px;padding:24px 26px;margin-bottom:16px;}
+.color-picker-note{font-size:12px;color:var(--ink-light);line-height:1.85;margin-bottom:14px;padding:10px 0;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);}
+.color-picker-note strong{color:var(--ink-mid);font-weight:500;}
+.confirm-message{background:#fff;border:0.5px solid var(--border);border-radius:3px;padding:20px 24px;margin-bottom:16px;font-size:13px;color:var(--ink-mid);line-height:1.95;}
+.confirm-message strong{color:var(--ink);font-weight:500;}
+.color-picker-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.color-picker-title{font-size:12px;color:var(--ink-mid);font-weight:500;}
+.color-picker-current{font-size:11px;color:var(--ink-hint);font-family:'Shippori Mincho',serif;}
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.color-swatch{aspect-ratio:1;border-radius:3px;cursor:pointer;border:0.5px solid var(--border);transition:all .2s;position:relative;}
+.color-swatch:hover{transform:scale(1.06);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.color-swatch.sel{border:1.5px solid var(--green-deep);box-shadow:0 0 0 2px rgba(45,107,86,0.15);}
+.color-swatch.sel::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--ink);font-size:14px;font-weight:600;}
+.done-mark{width:52px;height:52px;border-radius:50%;background:var(--green-pale);border:0.5px solid var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;}
+
+/* ===== S2T: タイトル入力（静かな一言） ===== */
+.title-vertical-wrap{margin-top:2px;}
+.title-vert-label{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-mid);cursor:pointer;}
+.title-vert-toggle{width:34px;height:20px;border-radius:10px;background:var(--border-mid);position:relative;flex-shrink:0;transition:background .2s;}
+.title-vert-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;}
+.title-vert-toggle.on{background:var(--green-mid);}
+.title-vert-toggle.on::after{left:17px;}
+.title-preview-wrap{background:var(--cream-dark);border-radius:2px;padding:20px 16px;margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.title-preview-card{width:160px;min-height:100px;background:var(--cream);border-radius:1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.tpc-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink);text-align:center;line-height:1.3;}
+.tpc-title.vertical{writing-mode:vertical-rl;font-size:22px;height:80px;}
+.tpc-sub{font-size:10px;color:var(--ink-light);text-align:center;letter-spacing:0.08em;}
+.tpc-rule{width:24px;height:0.5px;background:var(--ink-light);}
+.title-preview-note{font-size:11px;color:var(--ink-hint);}
+
+/* ===== Step II mode selection ===== */{display:flex;align-items:center;gap:8px;background:var(--green-pale);border:0.5px solid var(--green-light);border-radius:2px;padding:9px 14px;font-size:12px;color:var(--green-deep);margin-bottom:20px;}
+.freecheck{color:var(--green-mid);font-size:13px;}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+@media(max-width:520px){.mode-grid{grid-template-columns:1fr;}}
+.mode-card{border:0.5px solid var(--border-mid);border-radius:2px;background:#fff;padding:14px 12px 12px;cursor:pointer;transition:all .2s;position:relative;display:flex;flex-direction:column;}
+.mode-card:hover{border-color:var(--green-mid);}
+.mode-card.sel{border:1.5px solid var(--green-deep);box-shadow:0 0 0 2px rgba(45,107,86,0.08);}
+.mode-badge{position:absolute;top:10px;right:10px;background:var(--green-deep);color:#fff;font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:0.06em;}
+/* preview area */
+.mode-preview{background:var(--cream-dark);border-radius:2px;padding:14px 10px;margin-bottom:10px;min-height:90px;display:flex;align-items:center;justify-content:center;}
+.mp-caption{background:#fff;border-radius:1px;padding:8px 10px;width:100%;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.mp-title{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--ink);margin-bottom:6px;}
+.mp-lines{display:flex;flex-direction:column;gap:3px;margin-bottom:6px;}
+.mp-line{height:2px;background:var(--border-mid);border-radius:1px;}
+.mp-line.w90{width:90%;}
+.mp-line.w75{width:75%;}
+.mp-line.w85{width:85%;}
+.mp-line.w60{width:60%;}
+.mp-foot{font-size:9px;color:var(--ink-hint);text-align:right;margin-top:4px;}
+.mp-namecard{background:#fff;border-radius:1px;padding:10px 12px;width:100%;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;}
+.mp-namecard.plain{padding:14px 12px;}
+.mp-nc-title{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--ink);margin-bottom:2px;}
+.mp-nc-sub{font-size:9px;color:var(--ink-light);margin-bottom:6px;}
+.mp-nc-rule{width:28px;height:0.5px;background:var(--ink-light);margin:0 auto 0;}
+.mp-nc-rule.short{width:16px;margin:0 auto 8px;}
+.mp-nc-logo{font-size:9px;color:var(--ink-light);letter-spacing:0.25em;}
+.mp-size-label{font-size:10px;color:var(--ink-hint);text-align:center;margin-bottom:8px;margin-top:-4px;}
+/* card content */
+.mode-name{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.mode-pts{list-style:none;padding:0;margin:0 0 10px;font-size:11.5px;color:var(--ink-light);line-height:1.85;}
+.mode-pts li{padding-left:12px;position:relative;}
+.mode-pts li::before{content:'・';position:absolute;left:0;color:var(--green-mid);}
+.mode-time{font-size:11px;color:var(--ink-hint);margin-bottom:10px;margin-top:auto;}
+.mode-btn{width:100%;font-size:12px;padding:9px 8px;}
+.mode-note{text-align:center;font-size:11px;color:var(--ink-hint);margin-top:4px;}
+
+/* ===== Step II mode selection ===== */
+
+/* プレビュー拡大モーダル */
+.preview-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:20px;}
+.preview-modal.open{display:flex;}
+.preview-modal-inner{position:relative;max-width:92vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;}
+.preview-modal-img{display:block;max-width:100%;max-height:80vh;object-fit:contain;border-radius:2px;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+.preview-modal-close{position:absolute;top:-16px;right:-16px;width:34px;height:34px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:18px;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;line-height:1;}
+.preview-modal-label{color:rgba(255,255,255,0.65);font-size:11px;margin-top:12px;letter-spacing:0.12em;}
+.prev-img{cursor:zoom-in;}
+
+/* Use-case toggle */
+.usecase-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;padding:18px 20px;margin-bottom:14px;}
+.usecase-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+.usecase-q{font-size:13px;color:var(--ink);font-weight:500;}
+.usecase-sub{font-size:10.5px;color:var(--ink-hint);}
+.usecase-opts{display:flex;gap:10px;}
+.usecase-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 8px;border:0.5px solid var(--border-mid);border-radius:18px;background:var(--cream);cursor:pointer;transition:all .25s;font-size:12.5px;color:var(--ink-light);}
+.usecase-opt:hover{border-color:var(--green-mid);}
+.usecase-opt.sel{background:var(--green-pale);border-color:var(--green-mid);color:var(--green-deep);}
+.usecase-radio{width:12px;height:12px;border-radius:50%;border:1px solid var(--ink-hint);position:relative;flex-shrink:0;}
+.usecase-opt.sel .usecase-radio{border-color:var(--green-mid);}
+.usecase-opt.sel .usecase-radio::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--green-mid);}
+
+/* Hints + capability card */
+.hints-card{background:var(--cream-dark);border:0.5px solid var(--border);border-radius:2px;padding:18px 20px;margin-bottom:14px;}
+.hints-title{font-size:12.5px;color:var(--green-deep);font-weight:500;margin-bottom:10px;}
+.hints-list{list-style:none;padding:0;margin:0 0 14px 0;}
+.hints-list li{font-size:12px;color:var(--ink-mid);line-height:1.8;padding-left:14px;position:relative;}
+.hints-list li::before{content:'・';color:var(--green-mid);position:absolute;left:0;font-size:13px;}
+.hints-divider{height:1px;background:var(--border);margin:10px 0 8px;}
+.hints-cap-intro{font-size:11px;color:var(--ink-hint);margin-bottom:8px;}
+.cap-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.cap-badge{display:flex;align-items:center;gap:4px;padding:5px 8px;background:transparent;border:none;font-size:10.5px;color:var(--ink-mid);flex:1;min-width:0;white-space:nowrap;}
+.cap-check{color:var(--green-mid);font-size:10px;flex-shrink:0;}
+
+/* Multi-upload area */
+.multi-upload-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+.multi-upload-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:0.02em;}
+.multi-upload-limit{font-size:11px;color:var(--green-mid);font-weight:500;}
+.multi-upload-hint{font-size:11.5px;color:var(--ink-light);line-height:1.7;margin-bottom:10px;}
+.multi-drop{border:0.5px dashed var(--border-mid);border-radius:2px;background:var(--cream-dark);padding:18px 14px;}
+.multi-slots{display:flex;gap:10px;justify-content:center;}
+.multi-slot{flex:1;max-width:120px;aspect-ratio:1.1;border:0.5px dashed var(--border-mid);border-radius:2px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.multi-slot:hover{border-color:var(--green-mid);}
+.multi-slot.filled{border-style:solid;border-color:var(--green-light);cursor:default;}
+.multi-slot.processing{border-style:solid;border-color:var(--gold-border);}
+.multi-slot-plus{font-size:22px;color:var(--ink-hint);line-height:1;}
+.multi-slot-label{font-size:10px;color:var(--ink-hint);margin-top:6px;}
+.multi-slot-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.multi-slot-spinner{width:24px;height:24px;border:2px solid var(--cream);border-top-color:var(--green-mid);border-radius:50%;animation:spin .9s linear infinite;}
+.multi-slot-status{font-size:10px;color:var(--ink-hint);margin-top:6px;text-align:center;}
+.multi-slot-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,0.6);color:#fff;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;z-index:2;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Preview comparison */
+.previews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.prev-card{border:0.5px solid var(--border-mid);border-radius:2px;background:#fff;padding:12px;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;}
+.prev-card:hover{border-color:var(--green-mid);}
+.prev-card.sel{border:1.5px solid var(--green-mid);box-shadow:0 0 0 2px rgba(45,107,86,0.08);}
+.prev-card-badge{display:inline-flex;align-self:flex-start;align-items:center;gap:3px;padding:3px 8px;background:var(--green-pale);color:var(--green-deep);font-size:10px;border-radius:2px;margin-bottom:8px;font-weight:500;height:18px;visibility:hidden;}
+.prev-card.sel .prev-card-badge{visibility:visible;}
+.prev-img{aspect-ratio:1;background:var(--cream-dark);border-radius:2px;overflow:hidden;position:relative;margin-bottom:10px;cursor:zoom-in;}
+.prev-img img{width:100%;height:100%;object-fit:cover;}
+.prev-num{font-size:11px;color:var(--ink-mid);text-align:center;margin-bottom:8px;font-weight:500;}
+.prev-btn{padding:7px 8px;font-size:11.5px;background:#fff;color:var(--ink);border:0.5px solid var(--border-mid);border-radius:2px;cursor:pointer;text-align:center;transition:all .2s;}
+.prev-card.sel .prev-btn{background:var(--green-deep);color:#fff;border-color:var(--green-deep);}
+.preview-note{background:var(--cream-dark);padding:12px 16px;border-radius:2px;font-size:11.5px;color:var(--ink-light);line-height:1.7;margin-bottom:18px;}
+
+/* Compare panels (Step VI) */
+.compare-panel{background:var(--cream-dark);border:0.5px solid var(--border);border-radius:2px;padding:18px 20px;margin-bottom:14px;}
+.compare-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px;}
+.compare-title{font-size:13px;color:var(--ink);font-weight:500;}
+.compare-sub{font-size:10.5px;color:var(--ink-hint);}
+.compare-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:center;margin-bottom:10px;}
+.size-shapes{display:flex;align-items:flex-end;gap:18px;padding:8px 4px;}
+.size-shape{display:flex;flex-direction:column;align-items:center;}
+.size-rect{background:linear-gradient(135deg,#E5DDD0,#D4C5A8);position:relative;border:0.5px solid rgba(0,0,0,0.08);}
+.size-rect::before,.size-rect::after{content:'';position:absolute;background:rgba(0,0,0,0.18);}
+.size-rect::before{top:18%;left:14%;right:14%;height:30%;}
+.size-rect::after{top:55%;left:22%;right:22%;height:12%;background:rgba(0,0,0,0.10);}
+.size-rect.sm{width:54px;height:40px;}
+.size-rect.f4{width:78px;height:58px;}
+.size-rect.f4{background:linear-gradient(135deg,#D4C5A8,#C5B89B);}
+.size-label{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--ink);font-weight:500;margin-top:8px;}
+.size-dim{font-size:10.5px;color:var(--ink-light);margin-top:2px;}
+.size-scene{aspect-ratio:1.7;background:#F8F5EF;border:0.5px solid var(--border);border-radius:2px;position:relative;overflow:hidden;}
+.size-scene-shelf{position:absolute;left:0;right:0;top:60%;height:1px;background:rgba(0,0,0,0.3);}
+.size-scene-f4{position:absolute;left:50%;top:22%;width:42px;height:30px;background:#D4C5A8;border:2px solid #E8D8B8;}
+.size-scene-f4-cap{position:absolute;left:50%;top:54%;font-size:9px;color:var(--ink-light);}
+.size-scene-sm{position:absolute;left:12%;top:60%;width:22px;height:17px;background:#E5DDD0;border:1.5px solid #E8D8B8;}
+.size-scene-sm-cap{position:absolute;left:6%;top:79%;font-size:9px;color:var(--ink-light);}
+.compare-caption{font-size:11.5px;color:var(--ink-mid);line-height:1.7;margin-top:6px;}
+
+/* Finish comparison panel */
+.finish-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.finish-col{background:#fff;border:0.5px solid var(--border-mid);border-radius:2px;padding:14px 12px;}
+.finish-col.premium{border:1px solid var(--gold-border);background:linear-gradient(180deg,#fff,#fdfaf2);}
+.finish-col-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:4px;}
+.finish-col-name{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;letter-spacing:0.08em;color:var(--ink);}
+.finish-col-tag{font-size:10px;color:var(--ink-hint);}
+.finish-col.premium .finish-col-tag{color:var(--gold);}
+.finish-shapes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.finish-shape-cell{aspect-ratio:1;background:#FAFAF7;border:0.5px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;position:relative;padding:8px;}
+.finish-shape-label{position:absolute;bottom:-2px;left:0;right:0;text-align:center;font-size:10px;color:var(--ink-hint);background:#fff;padding:1px 4px;}
+.finish-canvas{width:62%;aspect-ratio:1.3;background:#D4C5A8;position:relative;border:0.5px solid rgba(0,0,0,0.08);}
+.finish-canvas::before{content:'';position:absolute;inset:18%;background:rgba(0,0,0,0.20);}
+.finish-canvas.framed{background:#E8D8B8;padding:5px;}
+.finish-canvas.framed::before{inset:5px;background:#D4C5A8;}
+.finish-canvas.framed::after{content:'';position:absolute;inset:23%;background:rgba(0,0,0,0.20);}
+.finish-envelope{width:64%;aspect-ratio:1.2;background:#E5DDD0;position:relative;}
+.finish-envelope::before{content:'';position:absolute;left:0;right:0;bottom:0;height:0;border-style:solid;border-width:0 0 26px 64px;border-color:transparent transparent rgba(0,0,0,0.13) transparent;}
+.finish-envelope::after{content:'';position:absolute;left:0;right:0;bottom:0;height:0;border-style:solid;border-width:26px 32px 0 32px;border-color:rgba(0,0,0,0.10) transparent transparent transparent;}
+.finish-box{width:64%;aspect-ratio:1.5;background:#E8D8B8;border:0.5px solid #C9A87C;position:relative;}
+.finish-box::before{content:'';position:absolute;inset:15%;background:rgba(0,0,0,0.12);}
+.finish-box-lid{position:absolute;top:-30%;left:5%;width:90%;height:18%;background:#F0E2C4;border:0.5px solid #C9A87C;}
+.finish-features{list-style:none;padding:0;margin:0;font-size:11px;color:var(--ink-mid);line-height:1.7;}
+.finish-features li{padding-left:10px;position:relative;}
+.finish-features li::before{content:'・';position:absolute;left:0;color:var(--green-mid);}
+
+/* SKU grid (4 across) */
+.sku-grid-head{font-size:12.5px;color:var(--ink);margin-bottom:10px;}
+.sku-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+@media(min-width:560px){.sku-grid{grid-template-columns:repeat(4,1fr);}}
+.sku-card{border:0.5px solid var(--border-mid);border-radius:2px;background:#fff;padding:18px 10px 14px;cursor:pointer;transition:all .25s;text-align:center;position:relative;}
+.sku-card:hover{border-color:var(--green-mid);}
+.sku-card.sel{border:1.5px solid var(--green-deep);box-shadow:0 0 0 2px rgba(45,107,86,0.08);}
+.sku-badge{display:inline-block;background:var(--green-deep);color:#fff;font-size:9px;padding:2px 8px;border-radius:2px;letter-spacing:0.06em;margin-bottom:6px;}
+.sku-line{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--ink);letter-spacing:0.08em;margin-bottom:4px;}
+.sku-size{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink-mid);line-height:1;margin-bottom:8px;}
+.sku-card.sel .sku-size{color:var(--green-deep);}
+.sku-price{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;color:var(--ink);margin-bottom:10px;}
+.sku-act{font-size:10px;color:var(--ink-light);padding:5px 8px;border:0.5px solid var(--border-mid);border-radius:2px;background:#fff;}
+.sku-card.sel .sku-act{background:var(--green-deep);color:#fff;border-color:var(--green-deep);}
+
+/* Finish comparison - photo wrap with fallback shape */
+.finish-photo-wrap{width:100%;aspect-ratio:1;background:#FAFAF7;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:2px;}
+.finish-photo-wrap img{width:100%;height:100%;object-fit:cover;}
+.finish-photo-wrap .finish-canvas,
+.finish-photo-wrap .finish-envelope,
+.finish-photo-wrap .finish-box{position:relative;}
+  .multi-slot{max-width:none;}
+  .compare-row{grid-template-columns:1fr;}
+  .size-scene{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="logo-area">
+  <img class="logo-img" alt="enisuru" id="topLogoImg">
+  <div class="logo-tagline">人生によりそう世界にひとつだけの作品</div>
+  <div class="logo-rule"></div>
+</div>
+
+<div>
+  <div class="steps" id="stepsBar">
+    <div class="sd active" id="d1">I</div><div class="sl" id="l1"></div>
+    <div class="sd todo" id="d2">II</div><div class="sl" id="l2"></div>
+    <div class="sd todo" id="d3">III</div><div class="sl" id="l3"></div>
+    <div class="sd todo" id="d4">IV</div>
+  </div>
+  <div class="step-lbs"><div class="slb">写真</div><div class="slb">想い</div><div class="slb">選ぶ</div><div class="slb">完成</div></div>
+</div>
+
+<!-- S1: Step I — 写真をアップロード -->
+<div class="screen on" id="s1">
+  <div class="card">
+    <div class="card-eyebrow">Step I — 写真をアップロード</div>
+    <div class="card-greeting serif">まず、写真をお選びください。</div>
+    <div class="card-body">最大3枚までアップロードできます。enisuruが比較プレビューをご用意します。決済まで無料・どの画面からもやめられます。</div>
+
+    <!-- Use-case toggle -->
+    <div class="usecase-card">
+      <div class="usecase-head">
+        <div class="usecase-q">どなたのための作品ですか？</div>
+        <div class="usecase-sub">回答に合わせて下のヒントが切り替わります</div>
+      </div>
+      <div class="usecase-opts">
+        <div class="usecase-opt" id="ucSelf" onclick="setUsecase('self')"><span class="usecase-radio"></span><span>自分のために</span></div>
+        <div class="usecase-opt sel" id="ucGift" onclick="setUsecase('gift')"><span class="usecase-radio"></span><span>大切な人への贈り物として</span></div>
+      </div>
+    </div>
+
+    <!-- Hints + capability card -->
+    <div class="hints-card">
+      <div class="hints-title" id="hintsTitle">写真選びのヒント — 大切な人への贈り物として</div>
+      <ul class="hints-list" id="hintsList">
+        <li>お相手の表情や仕草が見える一枚を</li>
+        <li>後ろに何が写っていても、選び方には影響しません</li>
+        <li>ふたりで写っている写真、その方の単独の写真、どちらも素敵な作品になります</li>
+      </ul>
+      <div class="hints-divider"></div>
+      <div class="hints-cap-intro">いい写真がない、と感じても大丈夫です — enisuruでこんなことができます</div>
+      <div class="cap-badges">
+        <div class="cap-badge"><span class="cap-check">✓</span><span>不要な背景は消せます</span></div>
+        <div class="cap-badge"><span class="cap-check">✓</span><span>主役以外をぼかせます</span></div>
+        <div class="cap-badge"><span class="cap-check">✓</span><span>古い写真でも大丈夫</span></div>
+      </div>
+    </div>
+
+    <!-- Multi-upload area -->
+    <input type="file" id="fileInputMulti" accept="image/*" multiple style="display:none" onchange="onMultiFile(this)">
+    <div class="field">
+      <div class="multi-upload-head">
+        <span class="multi-upload-title">写真をアップロード</span>
+        <span class="multi-upload-limit">最大3枚まで</span>
+      </div>
+      <div class="multi-upload-hint">迷ったら3枚お選びください。enisuruが3つのプレビューを並べてお見せします。</div>
+      <div class="multi-drop">
+        <div class="multi-slots" id="multiSlots">
+          <div class="multi-slot" data-idx="0" onclick="addPhoto(0)"><div class="multi-slot-plus">+</div><div class="multi-slot-label">1枚目</div></div>
+          <div class="multi-slot" data-idx="1" onclick="addPhoto(1)"><div class="multi-slot-plus">+</div><div class="multi-slot-label">2枚目</div></div>
+          <div class="multi-slot" data-idx="2" onclick="addPhoto(2)"><div class="multi-slot-plus">+</div><div class="multi-slot-label">3枚目</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <span class="fl-jp">お名前</span>
+      <div class="field-note">enisuruからのメッセージで使う、あなたへの呼びかけ用です。作家名は後の編集ステップで変更できます。</div>
+      <input type="text" id="userName" placeholder="例：田中 一郎" maxlength="30" style="margin-top:6px;">
+    </div>
+
+    <div class="btn-row" style="margin-top:32px;">
+      <button class="btn btn-p" id="s1NextBtn" onclick="goToPreview()" disabled>次に進む（プレビューを生成）</button>
+    </div>
+  </div>
+</div>
+
+<!-- S1B: Step I 続き — プレビュー比較・選択 -->
+<div class="screen" id="s1b">
+  <div class="card">
+    <div class="card-eyebrow">Step I 続き — お好みの一枚を選ぶ</div>
+    <div class="card-greeting serif">enisuruからのプレビュー</div>
+    <div class="card-body">お好みの一枚をお選びください。実際の作品もこの仕上がりをもとにお作りします。</div>
+
+    <div class="previews-grid" id="previewsGrid"></div>
+
+    <div class="field">
+      <label class="fl">作品の向き　<span style="text-transform:none;letter-spacing:0;color:var(--ink-hint);font-size:11px;">— 自動検出済・必要なら変更できます</span></label>
+      <div class="orient-wrap">
+        <div class="op" id="opLand" onclick="setOrient('landscape')"><div class="op-rect" style="width:60px;height:42px;"></div><div class="op-label">横型</div></div>
+        <div class="op" id="opPort" onclick="setOrient('portrait')"><div class="op-rect" style="width:36px;height:52px;"></div><div class="op-label">縦型</div></div>
+      </div>
+    </div>
+
+    <div class="preview-note">
+      他の写真は使用されず、選ばれた一枚のみで作品をお作りします。<br>もしどれも気に入らない場合は、前の画面に戻って別の写真をお試しください。
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="go(1,1)">前の画面に戻る</button>
+      <button class="btn btn-p" id="s1bNextBtn" onclick="go(2.5,2)">この一枚で進む</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2M: Step II — 仕上げを選ぶ -->
+<div class="screen" id="s2m">
+  <div class="card">
+    <div class="card-eyebrow">Step II — 仕上げを選ぶ</div>
+    <div class="card-greeting serif">どんな作品にしましょうか</div>
+    <div class="card-body">写真にどんな言葉を添えるか、3つの中からお選びください</div>
+    <div class="free-note-bar"><span class="freecheck">✓</span> 決済まで完全無料・どの画面からもやめられます</div>
+    <div class="mode-grid">
+
+      <!-- 物語が宿る作品 -->
+      <div class="mode-card sel" id="mc0" onclick="setMode(0)">
+        <div class="mode-badge">おすすめ</div>
+        <div class="mode-preview">
+          <div class="mp-caption">
+            <div class="mp-title">三春</div>
+            <div class="mp-lines"><div class="mp-line w90"></div><div class="mp-line w75"></div><div class="mp-line w85"></div><div class="mp-line w60"></div></div>
+            <div class="mp-foot">ポストカード（A6）</div>
+          </div>
+        </div>
+        <div class="mode-name">物語が宿る作品</div>
+        <ul class="mode-pts">
+          <li>数問の質問に答えるだけ</li>
+          <li>文章は enisuru が提案</li>
+          <li>そのままでも、編集してもOK</li>
+        </ul>
+        <div class="mode-time">約 10〜15 分</div>
+        <button class="btn btn-p mode-btn" onclick="goMode(0)">この仕上げで進む</button>
+      </div>
+
+      <!-- 静かな一言の作品 -->
+      <div class="mode-card" id="mc1" onclick="setMode(1)">
+        <div class="mode-preview">
+          <div class="mp-namecard">
+            <div class="mp-nc-title">あの夏</div>
+            <div class="mp-nc-sub">motoo · 2024</div>
+            <div class="mp-nc-rule"></div>
+          </div>
+        </div>
+        <div class="mp-size-label">名刺サイズ</div>
+        <div class="mode-name">静かな一言の作品</div>
+        <ul class="mode-pts">
+          <li>短いタイトル一つを添える</li>
+          <li>「あの夏」「祖父の手」のような</li>
+        </ul>
+        <div class="mode-time">約 2〜3 分</div>
+        <button class="btn btn-o mode-btn" id="mb1" onclick="goMode(1)">この仕上げで進む</button>
+      </div>
+
+      <!-- 言葉のない作品 -->
+      <div class="mode-card" id="mc2" onclick="setMode(2)">
+        <div class="mode-preview">
+          <div class="mp-namecard plain">
+            <div class="mp-nc-rule short"></div>
+            <div class="mp-nc-logo">e n i s u r u</div>
+          </div>
+        </div>
+        <div class="mp-size-label">名刺サイズ</div>
+        <div class="mode-name">言葉のない作品</div>
+        <ul class="mode-pts">
+          <li>言葉を添えない仕上がり</li>
+          <li>enisuru のサインのみ</li>
+        </ul>
+        <div class="mode-time">約 30 秒</div>
+        <button class="btn btn-o mode-btn" id="mb2" onclick="goMode(2)">この仕上げで進む</button>
+      </div>
+
+    </div>
+    <div class="mode-note">どれを選んでも、後から変更できます</div>
+    <div class="btn-row" style="margin-top:4px;">
+      <button class="btn btn-o" onclick="go(1.5,1)">← 写真を選び直す</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="screen" id="s2">
+  <div class="card">
+    <div class="card-eyebrow">Step II — 想いを伝える</div>
+    <div class="card-greeting serif">その写真について、少し聞かせてください。</div>
+    <div class="card-body">うまく言えなくても大丈夫です。短い言葉でも、enisuruが丁寧に受け取ります。</div>
+    <div class="field"><label class="fl">Q1 — 写っているのは、誰／何ですか？</label><div class="field-example">人でも、動物でも、モノでも、風景でも。例：亡くなった愛犬のハナ／祖父が残した万年筆／窓辺のサボテン／海辺の灯台</div><input type="text" id="q1" placeholder="例：祖父が残した万年筆"></div>
+    <div class="field"><label class="fl">Q2 — この一枚を選んだのはなぜですか？</label><div class="field-example">「なんとなく目に止まった」でも大丈夫です。</div><textarea id="q2" placeholder="例：今もデスクの隅に置いてあって、ふと見るたびに祖父の手の動きを思い出すから。"></textarea></div>
+    <div class="field" style="margin-bottom:0;">
+      <label class="fl">Q3 — 誰かへの贈り物ですか？</label>
+      <div class="toggle-row" style="margin-top:8px;">
+        <button class="tb" id="gYes" onclick="setGift(true)">誰かに贈りたい</button>
+        <button class="tb" id="gNo" onclick="setGift(false)">自分のために残したい</button>
+      </div>
+      <div id="giftDetail" style="display:none;margin-top:10px;"><input type="text" id="giftTo" placeholder="例：娘の結婚祝いに／父の傘寿のお祝いとして"></div>
+    </div>
+    <div class="deep-toggle" onclick="toggleDeep()">
+      <div class="dt-main">
+        <div class="dt-label">＋ もう少し深くお聞かせください（5つの問いフレーム）</div>
+        <div class="deep-intro">任意ですが、お答えいただくほど enisuru の提案がより深く、あなたの想いに近づきます。</div>
+      </div>
+      <div class="dt-action">
+        <span class="dt-action-text" id="dtActionText">開く</span>
+        <span class="dt-chevron" id="dtIcon">▼</span>
+      </div>
+    </div>
+    <div class="deep-qs" id="deepQs">
+      <div class="dq"><span class="dq-cat">Relation</span><div class="dq-q">その存在は、あなたにとってどんなものでしたか？（人・動物・モノ・場所、いずれの場合も）</div><textarea id="dq1" placeholder="例：理屈抜きで安心できる存在でした。／日々の中で、静かに支えてくれた一つでした。"></textarea></div>
+      <div class="dq"><span class="dq-cat">Time</span><div class="dq-q">この写真が撮られた頃、どんな時間の中にいましたか？</div><textarea id="dq2" placeholder="例：仕事が忙しくて、一緒にいる時間が少なかった頃でした。"></textarea></div>
+      <div class="dq"><span class="dq-cat">Emotion</span><div class="dq-q">この写真を見ると、胸のどこかに何かが残りますか？</div><textarea id="dq3" placeholder="例:懐かしさと、あのとき伝えられなかった後悔が少し。"></textarea></div>
+      <div class="dq"><span class="dq-cat">Gift</span><div class="dq-q">この作品を手渡すとしたら、何を伝えたいですか？</div><textarea id="dq4" placeholder="例：「あなたのことをずっと見ていたよ」という気持ち。"></textarea></div>
+      <div class="dq" style="margin-bottom:0;"><span class="dq-cat">Future</span><div class="dq-q">100年後に誰かが見たとき、何が伝わってほしいですか？</div><textarea id="dq5" placeholder="例:こんなに深く誰かを思った時間が、この時代にあったこと。"></textarea></div>
+    </div>
+    <div id="qErr" class="err">Q1とQ2を入力していただくと、enisuruがより丁寧に受け取ることができます。</div>
+    <div class="btn-row" style="margin-top:32px;">
+      <button class="btn btn-o" onclick="go(2.5,2)">← 仕上げを変える</button>
+      <button class="btn btn-p" onclick="runGen()">想いを形にしてもらう</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2T: Step III-B — 静かな一言の作品（タイトル入力） -->
+<div class="screen" id="s2t">
+  <div class="card">
+    <div class="card-eyebrow">Step III — 静かな一言の作品</div>
+    <div class="card-greeting serif">作品のタイトルを教えてください</div>
+    <div class="card-body">短い一言で構いません。「あの夏」「祖父の手」のような形でも</div>
+
+    <div class="field">
+      <span class="fl-jp">タイトル　<span style="color:var(--ink-hint);font-weight:400;font-size:11px;">最大16文字程度</span></span>
+      <input type="text" id="titleOnly" maxlength="20" placeholder="例：あの夏" style="font-size:18px;font-family:'Cormorant Garamond',serif;margin-top:8px;" oninput="updateTitlePreview()">
+    </div>
+
+    <div class="field">
+      <span class="fl-jp">作品に添える情報　<span style="color:var(--ink-hint);font-weight:400;font-size:11px;">自動入力済み・編集可能</span></span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+        <div>
+          <label class="fl" style="margin-bottom:4px;">作家名</label>
+          <input type="text" id="titleAuthor" maxlength="30" oninput="updateTitlePreview()">
+        </div>
+        <div>
+          <label class="fl" style="margin-bottom:4px;">年</label>
+          <input type="text" id="titleYear" maxlength="10" oninput="updateTitlePreview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="title-vertical-wrap">
+        <label class="title-vert-label">
+          <span class="title-vert-toggle" id="titleVertToggle" onclick="toggleTitleVert()"></span>
+          縦書きにする（タイトルが2〜4文字の和文向き）
+        </label>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <span class="fl-jp">完成イメージ — 名刺サイズ</span>
+      <div class="title-preview-wrap" id="titlePreviewWrap">
+        <div class="title-preview-card" id="titlePreviewCard">
+          <div class="tpc-title" id="tpcTitle">あの夏</div>
+          <div class="tpc-sub" id="tpcSub"></div>
+          <div class="tpc-rule"></div>
+        </div>
+        <div class="title-preview-note">作品本体（painting）と一緒に同梱されます</div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:28px;">
+      <button class="btn btn-o" onclick="go(2.5,2)">← 仕上げを変える</button>
+      <button class="btn btn-p" onclick="goTitleMode()">このタイトルで進む</button>
+    </div>
+  </div>
+</div>
+
+<!-- S3: Loading -->
+<div class="screen" id="s3">
+  <div class="card" style="text-align:center;padding:88px 32px;">
+    <div class="load-bars"><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div></div>
+    <div class="loading-msg" id="loadMsg">あなたの言葉から、そっと意味を読み取っています。</div>
+  </div>
+</div>
+
+<!-- S4: enisuruより（解釈メッセージ） -->
+<div class="screen" id="s4">
+  <div class="interp-card">
+    <div class="interp-from">enisuru より</div>
+    <div class="interp-text" id="interpText"></div>
+  </div>
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn btn-o" onclick="go(2,2)">← 想いを書き直す</button>
+    <button class="btn btn-p" onclick="go(4.5,3)">3つの案を見る</button>
+  </div>
+</div>
+
+<!-- S4B: 3つの案（キャプション選択 + 編集） -->
+<div class="screen" id="s4b">
+  <div class="card">
+    <div class="card-eyebrow">Step III — キャプションを選ぶ</div>
+    <div class="card-greeting serif">3つの案をご用意しました。</div>
+    <div class="card-body">どれが一番しっくりきますか。直感で選んでいただいて構いません。選んだ後、各項目を自由に変えることもできます。</div>
+    <div class="cands" id="candGrid"></div>
+    <div id="editSection" style="display:none;" class="edit-section">
+      <div class="edit-intro">選んだ案を元に、各項目を整えていきましょう。<strong>すべての項目はこのまま使うことも、自由に書き換えることもできます。</strong>空欄でも構わない項目もあります。</div>
+
+      <div class="field">
+        <span class="fl-jp">タイトル</span>
+        <div class="field-note">カードの一番上に、大きく表示される作品の名前です。写真の主題を端的に表す言葉が向いています。</div>
+        <div class="field-example">例：「三春」（ペットの名前）／「祖父の手」／「夏の光」</div>
+        <input type="text" id="editTitle" maxlength="30" style="margin-top:8px;">
+      </div>
+
+      <div class="field">
+        <span class="fl-jp">作家名 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
+        <div class="field-note">キャプションに載せるお名前です。撮影者・制作者・主役（ペットの飼い主など）のお名前として、カードに表示されます。</div>
+        <div class="field-example">例：「田中 一郎」／「motoo」／「家族一同」</div>
+        <input type="text" id="editAuthor" maxlength="40" style="margin-top:8px;">
+      </div>
+
+      <div class="field">
+        <span class="fl-jp">場所 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
+        <div class="field-note">写真にまつわる場所です。撮影地でも、思い出の場所でもかまいません。</div>
+        <div class="field-example">例：「東京」／「祖父母の家、福岡」／「鎌倉・由比ヶ浜」</div>
+        <input type="text" id="editPlace" maxlength="60" style="margin-top:8px;">
+      </div>
+
+      <div class="field">
+        <span class="fl-jp">日付 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
+        <div class="field-note">写真にまつわる日付や期間です。正確でなくても構いません。</div>
+        <div class="field-example">例：「2024年7月」／「1985年夏」／「2014年9月〜2024年7月」</div>
+        <input type="text" id="editDate" maxlength="60" style="margin-top:8px;">
+      </div>
+
+      <div class="field">
+        <span class="fl-jp">本文</span>
+        <div class="field-note">写真にまつわる物語や想いを綴った言葉です。<strong>段落・改行を活かして読みやすく整えてください</strong>（短く区切ると、より美しく見えます）。100〜300字程度・<strong>最大20行まで</strong>。</div>
+        <textarea id="editBody" rows="10" style="margin-top:8px;" oninput="countBody()"></textarea>
+        <div class="char-count" id="bodyCharCount"></div>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <span class="fl-jp">作品説明 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
+        <div class="field-note">カードの下部に、小さく表示される補足説明です。</div>
+        <div class="field-example">例：「一緒に住み始めた新宿の賃貸アパート」／「伊豆白浜の海」</div>
+        <input type="text" id="editDescr" maxlength="80" style="margin-top:8px;">
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:32px;">
+      <button class="btn btn-o" onclick="go(4,3)">← enisuruのメッセージに戻る</button>
+    </div>
+    <button class="btn btn-p" id="goFinalBtn" style="margin-top:10px;" onclick="goToFinal()" disabled>キャプションを選んでください</button>
+  </div>
+</div>
+
+<!-- S5: Final -->
+<div class="screen" id="s5">
+  <div class="impression-note"><strong>※ この写真は印象画風に加工する前のイメージです。</strong><br>実際の作品は、お届けする写真をもとに専門の職人が仕上げを施した、一点物の絵画にしてお届けします。</div>
+
+  <div class="final-outer">
+    <div class="fc-photo-wrap" id="fcPhotoWrap">
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--green-pale);">
+        <span class="serif" style="font-size:12px;letter-spacing:0.3em;color:var(--green-mid);">e n i s u r u</span>
+      </div>
+    </div>
+    <div class="fc-caption-area" id="fcCaptionArea">
+      <div class="fc-title mincho" id="fcTitle"></div>
+      <div class="fc-meta" id="fcMeta"></div>
+      <div class="fc-rule-thin"></div>
+      <div class="fc-body" id="fcBody"></div>
+      <div class="fc-desc" id="fcDesc" style="display:none;"></div>
+      <div class="fc-foot"><img class="fc-logo-img" id="fcLogoImg" alt="enisuru"></div>
+    </div>
+  </div>
+
+  <div class="color-picker-wrap">
+    <div class="color-picker-head">
+      <div class="color-picker-title">背景色（25色から選べます）</div>
+      <div class="color-picker-current" id="colorCurrent">— —</div>
+    </div>
+    <div class="color-picker-note">
+      初期表示は <strong>生成色（No.3）</strong> です。<br>下の25色から、<strong>あなたの作品の中で最も象徴的な色に近い色</strong>を選ばれることをおすすめします。
+    </div>
+    <div class="color-grid" id="colorGrid"></div>
+  </div>
+
+  <div class="confirm-message">
+    上記の完成イメージをもとに、enisuruチームが <strong>実際の作品とキャプション</strong> を一点ずつ手作業で制作し、お届けします。<br>このまま「注文を確定する」を押していただくと、制作工程に入ります。
+  </div>
+
+  <div class="btn-row"><button class="btn btn-o" onclick="go(4.5,3)">選び直す</button><button class="btn btn-p" onclick="goToVariants()">サイズと装丁を選ぶ</button></div>
+</div>
+
+<!-- S5B: Step VI — サイズと装丁 -->
+<div class="screen" id="s5b">
+  <div class="card">
+    <div class="card-eyebrow">Step VI — サイズと装丁</div>
+    <div class="card-greeting serif">お部屋や贈り方に合わせてお選びください。</div>
+    <div class="card-body">迷ったら Classic SM がおすすめです（最も手に取りやすいサイズ）。</div>
+
+    <!-- Size compare panel -->
+    <div class="compare-panel">
+      <div class="compare-head">
+        <div class="compare-title">サイズの違い</div>
+        <div class="compare-sub">SM と F4 の現物比較 + 飾った時の見え方</div>
+      </div>
+      <div class="compare-row">
+        <div>
+          <div style="font-size:11px;color:var(--ink-light);margin-bottom:8px;">現物の大きさ（同スケール表示）</div>
+          <div class="size-shapes">
+            <div class="size-shape"><div class="size-rect sm"></div><div class="size-label">SM</div><div class="size-dim">26 × 19 cm</div></div>
+            <div class="size-shape"><div class="size-rect f4"></div><div class="size-label">F4</div><div class="size-dim">36 × 27 cm</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--ink-light);margin-bottom:8px;">飾った時の見え方</div>
+          <div class="size-scene">
+            <div class="size-scene-shelf"></div>
+            <div class="size-scene-f4"></div>
+            <div class="size-scene-f4-cap">F4 — 壁掛け</div>
+            <div class="size-scene-sm"></div>
+            <div class="size-scene-sm-cap">SM — 卓上</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-caption">SM: 卓上・本棚に置いて毎日眺める　F4: 壁掛けや贈り物に・存在感が欲しい時に</div>
+    </div>
+
+    <!-- Finish compare panel -->
+    <div class="compare-panel">
+      <div class="compare-head">
+        <div class="compare-title">装丁の違い</div>
+        <div class="compare-sub">仕上げと届け方の違い</div>
+      </div>
+      <div class="finish-cols">
+        <div class="finish-col">
+          <div class="finish-col-head"><div class="finish-col-name">CLASSIC</div><div class="finish-col-tag">気軽に・自分用に</div></div>
+          <div class="finish-shapes">
+            <div class="finish-shape-cell">
+              <div class="finish-photo-wrap" id="fpClassicArt">
+                <div class="finish-canvas"></div>
+              </div>
+              <div class="finish-shape-label">作品のみ</div>
+            </div>
+            <div class="finish-shape-cell">
+              <div class="finish-photo-wrap" id="fpClassicPkg">
+                <div class="finish-envelope"></div>
+              </div>
+              <div class="finish-shape-label">クッション袋</div>
+            </div>
+          </div>
+          <ul class="finish-features">
+            <li>enisuru 作品 + 作品カード</li>
+            <li>クッション袋でお届け</li>
+            <li>シンプル・軽量・気軽に楽しめる</li>
+          </ul>
+        </div>
+        <div class="finish-col premium">
+          <div class="finish-col-head"><div class="finish-col-name">PREMIUM</div><div class="finish-col-tag">贈り物に・特別な日に</div></div>
+          <div class="finish-shapes">
+            <div class="finish-shape-cell">
+              <div class="finish-photo-wrap" id="fpPremiumFramed">
+                <div class="finish-canvas framed"></div>
+              </div>
+              <div class="finish-shape-label">桐製額縁付き</div>
+            </div>
+            <div class="finish-shape-cell">
+              <div class="finish-photo-wrap" id="fpPremiumBox">
+                <div class="finish-box"><div class="finish-box-lid"></div></div>
+              </div>
+              <div class="finish-shape-label">桐製箱でお届け</div>
+            </div>
+          </div>
+          <ul class="finish-features">
+            <li>enisuru 作品 + 桐製額縁 + 作品カード</li>
+            <li>桐製箱に納めてお届け</li>
+            <li>贈答用に最適・高級感のある仕上がり</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKU grid -->
+    <div class="sku-grid-head">あなたの組み合わせをお選びください</div>
+    <div class="sku-grid">
+      <div class="sku-card sel" data-sku="classic-sm" onclick="setSku('classic-sm')">
+        <div class="sku-badge">おすすめ</div>
+        <div class="sku-line">CLASSIC</div>
+        <div class="sku-size">SM</div>
+        <div class="sku-price">¥19,800</div>
+        <div class="sku-act">選択中 ✓</div>
+      </div>
+      <div class="sku-card" data-sku="classic-f4" onclick="setSku('classic-f4')">
+        <div class="sku-line">CLASSIC</div>
+        <div class="sku-size">F4</div>
+        <div class="sku-price">¥33,800</div>
+        <div class="sku-act">選ぶ</div>
+      </div>
+      <div class="sku-card" data-sku="premium-sm" onclick="setSku('premium-sm')">
+        <div class="sku-line">PREMIUM</div>
+        <div class="sku-size">SM</div>
+        <div class="sku-price">¥24,800</div>
+        <div class="sku-act">選ぶ</div>
+      </div>
+      <div class="sku-card" data-sku="premium-f4" onclick="setSku('premium-f4')">
+        <div class="sku-line">PREMIUM</div>
+        <div class="sku-size">F4</div>
+        <div class="sku-price">¥39,800</div>
+        <div class="sku-act">選ぶ</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="goBackFromVariants()">← 選び直す</button>
+      <button class="btn btn-p" onclick="go(6,4)">注文情報の入力へ進む</button>
+    </div>
+  </div>
+</div>
+
+<!-- S6: 連絡先・お届け先 -->
+<div class="screen" id="s6">
+  <div class="card">
+    <div class="card-eyebrow">Step IV — 注文情報</div>
+    <div class="card-greeting serif">ご注文の最後のお手続きです。</div>
+    <div class="card-body">作品の制作・お届けに必要な情報をお聞かせください。enisuruから完成のご連絡や発送のお知らせをお送りするためのものです。</div>
+
+    <div class="field">
+      <span class="fl-jp">メールアドレス <span style="color:#C0392B;font-weight:400;font-size:11px;">（必須）</span></span>
+      <div class="field-note">完成のご連絡・発送のお知らせをお送りします。</div>
+      <input type="email" id="custEmail" placeholder="例：example@enisuru.jp" maxlength="120">
+    </div>
+
+    <div class="field">
+      <span class="fl-jp">お電話番号 <span style="color:#C0392B;font-weight:400;font-size:11px;">（必須）</span></span>
+      <div class="field-note">配送業者からのご連絡用です。</div>
+      <input type="tel" id="custPhone" placeholder="例：080-1234-5678" maxlength="20">
+    </div>
+
+    <div class="field">
+      <span class="fl-jp">郵便番号</span>
+      <input type="text" id="custZip" placeholder="例：231-0023" maxlength="10">
+    </div>
+
+    <div class="field">
+      <span class="fl-jp">お届け先住所 <span style="color:#C0392B;font-weight:400;font-size:11px;">（必須）</span></span>
+      <div class="field-note">作品をお届けする住所です。マンション名・部屋番号までご記入ください。</div>
+      <textarea id="custAddress" rows="3" placeholder="例：神奈川県横浜市中区山下町1-1 〇〇マンション 101号室"></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <span class="fl-jp">ご注文への補足・ご要望 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
+      <div class="field-note">仕上げや配送について、ご希望やご質問があればお書きください。</div>
+      <textarea id="custMessage" rows="3" placeholder="例：誕生日の前日までに届くと嬉しいです／ラッピングしてください"></textarea>
+    </div>
+
+    <div id="contactErr" class="err"></div>
+
+    <div class="btn-row" style="margin-top:32px;">
+      <button class="btn btn-o" onclick="go(5.5,3)">前の画面に戻る</button>
+    </div>
+    <button class="btn btn-p" id="submitBtn" style="margin-top:10px;" onclick="submitOrder()">enisuruに送る</button>
+  </div>
+</div>
+
+<!-- S7: 完了 -->
+<div class="screen" id="s7">
+  <div class="card" style="text-align:center;padding:60px 32px;">
+    <div class="done-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-mid)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="serif" style="font-size:24px;color:var(--green-deep);margin-bottom:12px;">ありがとうございます。</div>
+    <div style="font-size:13.5px;color:var(--ink-light);line-height:2.0;margin-bottom:8px;">あなたの想いを、大切に受け取りました。<br>enisuruは、その言葉を一つも忘れずに<br>作品を仕上げます。届くのを楽しみにお待ちください。</div>
+    <div id="orderIdBlock" style="margin:24px 0 28px;padding:14px 18px;background:var(--cream-dark);border-radius:2px;display:none;">
+      <div style="font-size:10px;letter-spacing:0.14em;color:var(--ink-hint);text-transform:uppercase;margin-bottom:4px;">ご注文番号</div>
+      <div id="orderIdDisplay" style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--ink);"></div>
+    </div>
+    <div style="font-size:12.5px;color:var(--ink-light);background:var(--green-pale);border:0.5px solid var(--green-light);border-radius:2px;padding:12px 16px;margin-bottom:24px;line-height:1.8;">
+      まもなく決済ページへ移動します。<br>
+      <span style="font-size:11px;color:var(--ink-hint);">自動で移動しない場合は、下のボタンをお使いください。</span>
+    </div>
+    <button class="btn btn-p" id="shopifyBtn" style="max-width:280px;margin:0 auto 12px;display:none;" onclick="goToShopify()">決済ページへ進む</button>
+    <button class="btn btn-o" style="max-width:260px;margin:0 auto;" onclick="resetAll()">別の写真で体験する</button>
+  </div>
+</div>
+
+<!-- プレビュー拡大モーダル -->
+<div class="preview-modal" id="previewModal" onclick="closePreviewModal(event)">
+  <div class="preview-modal-inner">
+    <button class="preview-modal-close" onclick="closePreviewModal()">×</button>
+    <img class="preview-modal-img" id="previewModalImg" src="" alt="">
+    <div class="preview-modal-label" id="previewModalLabel"></div>
+  </div>
+</div>
+
+<canvas id="workCanvas" style="display:none;"></canvas>
+
+<script>
+// ============================================================
+// ★ APIキーをここに貼り付けてください ★
+// 取得先: console.anthropic.com → API Keys
+const ANTHROPIC_API_KEY = 'sk-ant-api03-ここを書き換えてください';
+// ============================================================
+
+// ============================================================
+// ★ Google Apps Script の Web App URL をここに貼り付けてください ★
+// 取得方法: 付属の setup_guide.md を参照
+// 未設定（'ここを書き換え'のまま）の場合、注文送信は無効化されます
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/ここを書き換えてください/exec';
+// ============================================================
+
+// enisuru ロゴ（base64 PNG・透過背景）
+const ENISURU_LOGO_B64 = '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';
+
+// 25色の伝統色パレット
+const COLOR_PALETTE = [
+  {hex:'#F5E6D3', name:'練色', no:1},
+  {hex:'#EFE5D7', name:'砂色', no:2},
+  {hex:'#F0E8DD', name:'生成色', no:3},
+  {hex:'#E8D8C0', name:'玉子色', no:4},
+  {hex:'#EADAC8', name:'淡香', no:5},
+  {hex:'#F5DCD2', name:'桜色', no:6},
+  {hex:'#EFC8B6', name:'鴇色', no:7},
+  {hex:'#ECCBC8', name:'桃花色', no:8},
+  {hex:'#E8B8C0', name:'撫子色', no:9},
+  {hex:'#DDA8B0', name:'退紅', no:10},
+  {hex:'#DEC0D0', name:'紫陽花', no:11},
+  {hex:'#DCC8DC', name:'淡桔梗', no:12},
+  {hex:'#C8B8D0', name:'藤色', no:13},
+  {hex:'#C0C8DC', name:'楝色', no:14},
+  {hex:'#D0D0E0', name:'薄藤', no:15},
+  {hex:'#B8C8DC', name:'浅葱', no:16},
+  {hex:'#C0D0DC', name:'水色', no:17},
+  {hex:'#B8C8C8', name:'鼠色', no:18},
+  {hex:'#C0D8C8', name:'白緑', no:19},
+  {hex:'#BCD8C8', name:'翡翠', no:20},
+  {hex:'#B8D0BC', name:'若芽', no:21},
+  {hex:'#A8BCB0', name:'青磁', no:22},
+  {hex:'#C8D8C0', name:'苗色', no:23},
+  {hex:'#B8C0B0', name:'海松色', no:24},
+  {hex:'#C8E0C8', name:'抹茶色', no:25}
+];
+
+let isGift=null,orient=null,selCand=null,photoBlobUrl='',selColorIdx=2;
+// v15 additions
+let usecase='gift';
+let uploadedPhotos=[null,null,null]; // {data, preview, status}
+let selectedPreviewIdx=null;
+let selectedSku='classic-sm';
+
+// ============================================================
+// ★ 装丁比較の商品写真 URL をここに貼り付けてください ★
+// 各URLはShopify CDN等の直リンクを使用してください
+const PRODUCT_PHOTOS = {
+  classic_artwork:  '',  // Classic: キャンバス単体の写真
+  classic_package:  '',  // Classic: クッション袋に入った写真
+  premium_framed:   '',  // Premium: 桐製額縁付きの写真
+  premium_box:      '',  // Premium: 桐製箱に納まった写真
+};
+// ============================================================
+
+// ============================================================
+// ★ GAS デプロイ後にここに URL を貼ってください ★
+// 例: 'https://script.google.com/macros/s/AKfy.../exec'
+const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwLfDbPSg8hwUNkQ5rp_9Totnp-dMcOY9Qamg_YM7DSJKCG-9dPSP7yZ2YiVLbeF6MO/exec';
+// ============================================================
+
+const HINTS = {
+  self: {
+    title: '写真選びのヒント — 自分のために',
+    items: [
+      'ふと心が動いた一枚を、直感で選んでください',
+      '完璧でなくて大丈夫です。「いい写真」かどうかは気にしないで',
+      'あなたが見て、何か感じる一枚があれば、それが正解です'
+    ]
+  },
+  gift: {
+    title: '写真選びのヒント — 大切な人への贈り物として',
+    items: [
+      'お相手の表情や仕草が見える一枚を',
+      '後ろに何が写っていても、選び方には影響しません',
+      'ふたりで写っている写真、その方の単独の写真、どちらも素敵な作品になります'
+    ]
+  }
+};
+
+// ページ読み込み時にロゴ画像をセット
+window.addEventListener('DOMContentLoaded',()=>{
+  const src='data:image/png;base64,'+ENISURU_LOGO_B64;
+  const top=document.getElementById('topLogoImg');if(top)top.src=src;
+  const fc=document.getElementById('fcLogoImg');if(fc)fc.src=src;
+  // v15: initialize use-case toggle (default: gift)
+  setUsecase('gift');
+  updateS1Button();
+  // v15: inject product photos into finish comparison if URLs are configured
+  const photoMap={
+    fpClassicArt:  PRODUCT_PHOTOS.classic_artwork,
+    fpClassicPkg:  PRODUCT_PHOTOS.classic_package,
+    fpPremiumFramed: PRODUCT_PHOTOS.premium_framed,
+    fpPremiumBox:  PRODUCT_PHOTOS.premium_box,
+  };
+  Object.entries(photoMap).forEach(([id,url])=>{
+    if(!url)return;
+    const wrap=document.getElementById(id);
+    if(wrap){wrap.innerHTML=`<img src="${url}" alt="" loading="lazy">`;}
+  });
+});
+
+function go(n,step){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  let id;
+  if(n===1.5)id='s1b';
+  else if(n===2.5)id='s2m';
+  else if(n===2.8)id='s2t';
+  else if(n===4.5)id='s4b';
+  else if(n===5.5)id='s5b';
+  else id='s'+n;
+  const el=document.getElementById(id);
+  if(el)el.classList.add('on');
+  for(let i=1;i<=4;i++){
+    document.getElementById('d'+i).className='sd '+(i<step?'done':i===step?'active':'todo');
+    if(i<4)document.getElementById('l'+i).className='sl'+(i<step?' done':'');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// v15: use-case toggle
+function setUsecase(v){
+  usecase=v;
+  document.getElementById('ucSelf').className='usecase-opt'+(v==='self'?' sel':'');
+  document.getElementById('ucGift').className='usecase-opt'+(v==='gift'?' sel':'');
+  const h=HINTS[v];
+  document.getElementById('hintsTitle').textContent=h.title;
+  document.getElementById('hintsList').innerHTML=h.items.map(x=>'<li>'+x+'</li>').join('');
+  // sync to v14's gift state
+  isGift=(v==='gift');
+}
+
+// v15: multi-upload
+function addPhoto(idx){
+  if(uploadedPhotos[idx]&&uploadedPhotos[idx].data)return;
+  const inp=document.getElementById('fileInputMulti');
+  inp.dataset.targetIdx=idx;
+  inp.click();
+}
+function onMultiFile(inp){
+  const files=Array.from(inp.files||[]);
+  if(!files.length){inp.value='';return;}
+  // Find empty slots starting from clicked one (or first empty)
+  const startIdx=parseInt(inp.dataset.targetIdx||'0',10);
+  let i=startIdx;
+  for(const f of files){
+    while(i<3&&uploadedPhotos[i]&&uploadedPhotos[i].data)i++;
+    if(i>=3)break;
+    const r=new FileReader();
+    const slotIdx=i;
+    r.onload=e=>{
+      uploadedPhotos[slotIdx]={data:e.target.result,preview:null,status:'processing'};
+      renderSlots();
+      processPhoto(slotIdx);
+      updateS1Button();
+    };
+    r.readAsDataURL(f);
+    i++;
+  }
+  inp.value='';
+}
+function removePhoto(idx){
+  uploadedPhotos[idx]=null;
+  renderSlots();
+  updateS1Button();
+}
+function renderSlots(){
+  const wrap=document.getElementById('multiSlots');
+  wrap.innerHTML='';
+  for(let i=0;i<3;i++){
+    const p=uploadedPhotos[i];
+    if(p&&p.data){
+      const cls='multi-slot filled'+(p.status==='processing'?' processing':'');
+      wrap.insertAdjacentHTML('beforeend',
+        `<div class="${cls}" data-idx="${i}">
+          <img class="multi-slot-img" src="${p.preview||p.data}">
+          <button class="multi-slot-remove" onclick="event.stopPropagation();removePhoto(${i})">×</button>
+        </div>`);
+    } else {
+      wrap.insertAdjacentHTML('beforeend',
+        `<div class="multi-slot" data-idx="${i}" onclick="addPhoto(${i})">
+          <div class="multi-slot-plus">+</div>
+          <div class="multi-slot-label">${i+1}枚目</div>
+        </div>`);
+    }
+  }
+}
+function updateS1Button(){
+  const has=uploadedPhotos.some(p=>p&&p.data);
+  document.getElementById('s1NextBtn').disabled=!has;
+}
+
+// v15: 写真スタイル変換（GAS経由でGemini APIを呼び出す）
+async function processPhoto(idx){
+  const p=uploadedPhotos[idx];
+  if(!p||!p.data)return;
+  console.log(`[processPhoto] idx=${idx} GAS_ENDPOINT=${GAS_ENDPOINT?'設定済':'未設定'}`);
+  try{
+    let previewData;
+    if(GAS_ENDPOINT){
+      // 送信前に画像を圧縮（GASのペイロード制限対策）
+      const compressed = await compressImage(p.data, 1200, 0.85);
+      const base64Clean=compressed.replace(/^data:image\/[a-z]+;base64,/,'');
+      const mimeType='image/jpeg';
+      const subject=document.getElementById('q1')?document.getElementById('q1').value.trim():'';
+      console.log(`[processPhoto] GASへ送信 base64長=${base64Clean.length}`);
+      const res=await fetch(GAS_ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({
+          action:'generatePreviews',
+          photos:[{data:base64Clean,mimeType}],
+          orient:orient||'landscape',
+          subject,
+        }),
+        redirect:'follow'
+      });
+      console.log(`[processPhoto] GASレスポンス status=${res.status}`);
+      const j=await res.json();
+      console.log(`[processPhoto] GASレスポンスJSON=`,j);
+      if(j.success&&j.previews?.[0]?.data){
+        previewData='data:image/png;base64,'+j.previews[0].data;
+        console.log(`[processPhoto] ✅ Gemini変換成功`);
+      } else {
+        const errMsg=j.previews?.[0]?.message||j.error||'変換に失敗しました';
+        console.warn('[processPhoto] Gemini変換失敗、モックで代替:', errMsg);
+        previewData=await mockPaintedPreview(p.data,idx);
+      }
+    } else {
+      console.log('[processPhoto] GAS未設定のためモック使用');
+      await new Promise(r=>setTimeout(r,800+Math.random()*1200));
+      previewData=await mockPaintedPreview(p.data,idx);
+    }
+    uploadedPhotos[idx].preview=previewData;
+    uploadedPhotos[idx].status='ready';
+    renderSlots();
+  }catch(err){
+    console.error('[processPhoto] エラー:', err);
+    try{
+      const fallback=await mockPaintedPreview(p.data,idx);
+      uploadedPhotos[idx].preview=fallback;
+      uploadedPhotos[idx].status='ready';
+    }catch(e2){
+      uploadedPhotos[idx].status='error';
+    }
+    renderSlots();
+  }
+}
+
+// 画像を指定サイズ・品質に圧縮してJPEGのdataURLを返す
+function compressImage(dataUrl, maxSize, quality){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
+      else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
+      c.width=w; c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+}
+function mockPaintedPreview(dataUrl,idx){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      const w=Math.min(img.width,800),scale=w/img.width;
+      c.width=w;c.height=img.height*scale;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0,c.width,c.height);
+      // Slight tint variations per slot to suggest "3 candidates"
+      const tints=[
+        'rgba(229,221,208,0.18)',
+        'rgba(212,197,168,0.16)',
+        'rgba(197,184,155,0.14)'
+      ];
+      ctx.fillStyle=tints[idx%3];
+      ctx.fillRect(0,0,c.width,c.height);
+      // Soft warm filter overlay
+      ctx.globalCompositeOperation='soft-light';
+      ctx.fillStyle='rgba(232,216,184,0.6)';
+      ctx.fillRect(0,0,c.width,c.height);
+      ctx.globalCompositeOperation='source-over';
+      resolve(c.toDataURL('image/jpeg',0.85));
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+}
+
+async function goToPreview(){
+  const name=document.getElementById('userName').value.trim();
+  if(!name){alert('お名前を入力してください。');return;}
+  const filled=uploadedPhotos.map((p,i)=>p&&p.data?i:-1).filter(i=>i>=0);
+  if(!filled.length){alert('写真を1枚以上アップロードしてください。');return;}
+  // Wait for any processing to finish
+  while(uploadedPhotos.some(p=>p&&p.status==='processing')){
+    await new Promise(r=>setTimeout(r,200));
+  }
+  buildPreviewsGrid(true); // fresh load → reset selection
+  // Auto-detect orientation from first photo's preview/raw
+  await autoDetectOrient();
+  go(1.5,1);
+}
+
+// プレビュー拡大モーダル
+function openPreviewModal(src, label){
+  document.getElementById('previewModalImg').src=src;
+  document.getElementById('previewModalLabel').textContent=label||'';
+  document.getElementById('previewModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePreviewModal(e){
+  if(e&&e.target!==document.getElementById('previewModal')&&!e.target.classList.contains('preview-modal-close'))return;
+  document.getElementById('previewModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePreviewModal({target:document.getElementById('previewModal')});});
+
+function buildPreviewsGrid(initSelection=false){
+  const grid=document.getElementById('previewsGrid');
+  grid.innerHTML='';
+  const filled=uploadedPhotos.map((p,i)=>({p,i})).filter(x=>x.p&&x.p.data);
+  if(initSelection||selectedPreviewIdx===null||!filled.some(x=>x.i===selectedPreviewIdx)){
+    selectedPreviewIdx=filled[0]?filled[0].i:null;
+  }
+  filled.forEach((x,n)=>{
+    const isSel=x.i===selectedPreviewIdx;
+    const imgSrc=x.p.preview||x.p.data;
+    const label=`プレビュー ${n+1}`;
+    grid.insertAdjacentHTML('beforeend',
+      `<div class="prev-card ${isSel?'sel':''}" data-idx="${x.i}" onclick="selectPreview(${x.i})">
+        <div class="prev-card-badge">選択中 ✓</div>
+        <div class="prev-img" onclick="event.stopPropagation();openPreviewModal('${imgSrc}','${label} — タップで閉じる')">
+          <img src="${imgSrc}" alt="${label}">
+          <div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.45);color:#fff;font-size:9px;padding:2px 5px;border-radius:2px;letter-spacing:0.06em;">拡大</div>
+        </div>
+        <div class="prev-num">${label}</div>
+        <div class="prev-btn">${isSel?'選択中':'この一枚を選ぶ'}</div>
+      </div>`);
+  });
+  syncPhotoBlobUrl();
+}
+function selectPreview(idx){
+  selectedPreviewIdx=idx;
+  buildPreviewsGrid(false); // preserve selection
+}
+function syncPhotoBlobUrl(){
+  const p=uploadedPhotos[selectedPreviewIdx];
+  if(p){
+    photoBlobUrl=p.preview||p.data;
+    // update s5 preview area
+    const wrap=document.getElementById('fcPhotoWrap');
+    if(wrap){
+      wrap.innerHTML='<img src="'+photoBlobUrl+'" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">';
+    }
+  }
+}
+async function autoDetectOrient(){
+  const p=uploadedPhotos[selectedPreviewIdx];
+  if(!p)return;
+  await new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      orient=img.width>=img.height?'landscape':'portrait';
+      setOrient(orient);
+      resolve();
+    };
+    img.onerror=resolve;
+    img.src=p.data;
+  });
+}
+
+// S2T: タイトル入力（静かな一言）
+let titleVertical = false;
+
+function updateTitlePreview(){
+  const t = document.getElementById('titleOnly').value || 'タイトル';
+  const author = document.getElementById('titleAuthor').value;
+  const year = document.getElementById('titleYear').value;
+  const tEl = document.getElementById('tpcTitle');
+  tEl.textContent = t;
+  tEl.className = 'tpc-title' + (titleVertical ? ' vertical' : '');
+  const sub = [author, year].filter(Boolean).join(' · ');
+  document.getElementById('tpcSub').textContent = sub;
+}
+
+function toggleTitleVert(){
+  titleVertical = !titleVertical;
+  const tog = document.getElementById('titleVertToggle');
+  tog.className = 'title-vert-toggle' + (titleVertical ? ' on' : '');
+  updateTitlePreview();
+}
+
+function goTitleMode(){
+  const title = document.getElementById('titleOnly').value.trim();
+  if(!title){ alert('タイトルを入力してください。'); return; }
+  const author = document.getElementById('titleAuthor').value.trim();
+  const year = document.getElementById('titleYear').value.trim();
+  // タイトルモード用のキャプションをセット
+  selCand = {
+    type: '静かな一言の作品',
+    title: title,
+    author_suggestion: author,
+    place_suggestion: '',
+    date_suggestion: year,
+    body: '',
+    description: ''
+  };
+  document.getElementById('editTitle').value = title;
+  document.getElementById('editAuthor').value = author;
+  document.getElementById('editPlace').value = '';
+  document.getElementById('editDate').value = year;
+  document.getElementById('editBody').value = '';
+  document.getElementById('editDescr').value = '';
+  // サイズと装丁へ直行（完成イメージをスキップ）
+  go(5.5, 3);
+}
+
+// v15: mode selection (Step II)
+let selectedMode = 0; // 0=物語, 1=タイトル, 2=言葉なし
+
+function setMode(m){
+  selectedMode = m;
+  [0,1,2].forEach(i=>{
+    document.getElementById('mc'+i).className='mode-card'+(i===m?' sel':'');
+    const mb = document.getElementById('mb'+i);
+    if(mb) mb.className='btn '+(i===m?'btn-p':'btn-o')+' mode-btn';
+  });
+  // mc0 uses btn-p by default (no id="mb0"), so handle manually
+  const mc0btn = document.querySelector('#mc0 .mode-btn');
+  if(mc0btn) mc0btn.className='btn '+(m===0?'btn-p':'btn-o')+' mode-btn';
+}
+
+function goMode(m){
+  setMode(m);
+  if(m === 1){
+    // 静かな一言 → タイトル入力画面
+    const userName = document.getElementById('userName').value.trim();
+    const year = new Date().getFullYear().toString();
+    document.getElementById('titleAuthor').value = userName;
+    document.getElementById('titleYear').value = year;
+    updateTitlePreview();
+    go(2.8, 2);
+  } else if(m === 2){
+    // 言葉のない作品 → サイズと装丁へ直行（完成イメージをスキップ）
+    go(5.5, 3);
+  } else {
+    // 物語が宿る作品 → 通常の想いを伝える画面へ
+    go(2, 2);
+  }
+}
+
+function goToFinalSilent(){
+  // 言葉のない作品: 空キャプションで完成プレビュー表示
+  selCand={type:'言葉のない作品',title:'',author_suggestion:'',place_suggestion:'',date_suggestion:'',body:'',description:''};
+  document.getElementById('editTitle').value='';
+  document.getElementById('editAuthor').value='';
+  document.getElementById('editPlace').value='';
+  document.getElementById('editDate').value='';
+  document.getElementById('editBody').value='';
+  document.getElementById('editDescr').value='';
+  goToFinal();
+}
+
+// v15: SKU selection (Step VI)
+function setSku(s){
+  selectedSku=s;
+  document.querySelectorAll('.sku-card').forEach(c=>{
+    const sel=c.dataset.sku===s;
+    c.className='sku-card'+(sel?' sel':'');
+    c.querySelector('.sku-act').textContent=sel?'選択中 ✓':'選ぶ';
+  });
+}
+function goBackFromVariants(){
+  if(selectedMode === 2){
+    // 言葉のない作品 → 仕上げ選択へ
+    go(2.5, 2);
+  } else if(selectedMode === 1){
+    // 静かな一言 → タイトル入力へ
+    go(2.8, 2);
+  } else {
+    // 物語が宿る作品 → 完成イメージへ
+    go(5, 3);
+  }
+}
+let _shopifyRedirectUrl='';
+function goToShopify(){if(_shopifyRedirectUrl)window.location.href=_shopifyRedirectUrl;}
+function goToVariants(){go(5.5,3);}
+
+function onFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{photoBlobUrl=e.target.result;showPreview(e.target.result);};r.readAsDataURL(f);}
+function setOrient(v){orient=v;document.getElementById('opLand').className='op'+(v==='landscape'?' sel':'');document.getElementById('opPort').className='op'+(v==='portrait'?' sel':'');}
+function goToQ(){if(!orient){alert('写真の向きを選んでください。');return;}setGift(isGift);go(2,2);}
+function setGift(v){isGift=v;document.getElementById('gYes').className='tb'+(v?' sel':'');document.getElementById('gNo').className='tb'+(!v?' sel':'');document.getElementById('giftDetail').style.display=v?'block':'none';}
+function toggleDeep(){
+  const d=document.getElementById('deepQs'),i=document.getElementById('dtIcon'),t=document.getElementById('dtActionText');
+  const tg=document.querySelector('.deep-toggle');
+  const o=d.classList.contains('show');
+  d.classList.toggle('show',!o);
+  i.classList.toggle('open',!o);
+  if(tg)tg.classList.toggle('open',!o);
+  if(t)t.textContent=!o?'閉じる':'開く';
+}
+function countBody(){
+  const v=document.getElementById('editBody').value;
+  const lines=v.split('\n').length;
+  const el=document.getElementById('bodyCharCount');
+  el.innerHTML=v.length+' 文字　/　'+lines+' 行';
+  if(v.length<100||v.length>300||lines>20){
+    el.style.color='#C0392B';
+    if(lines>20)el.innerHTML+=' <span style="font-size:10.5px;">（行数オーバー）</span>';
+  } else {
+    el.style.color='var(--ink-hint)';
+  }
+}
+
+async function runGen(){
+  const q1=document.getElementById('q1').value.trim();
+  const q2=document.getElementById('q2').value.trim();
+  if(!q1||!q2){document.getElementById('qErr').style.display='block';return;}
+  document.getElementById('qErr').style.display='none';
+  go(3,2);
+  const userName=document.getElementById('userName').value.trim();
+  const giftTo=isGift?(document.getElementById('giftTo').value.trim()||'大切な方へ'):'自分のために';
+  const dq=id=>document.getElementById(id).value.trim();
+  const msgs=['あなたの言葉から、そっと意味を読み取っています。','この写真の持つ時間を、丁寧にたどっています。','言葉にならなかった想いに、輪郭を見つけています。','3つの案を、それぞれの形で整えています。'];
+  let mi=0;
+  const lm=document.getElementById('loadMsg');
+  const iv=setInterval(()=>{lm.textContent=msgs[Math.min(mi++,msgs.length-1)];},2200);
+
+  const prompt=`あなたはenisuruというアートサービスのスタッフです。人格：想いの翻訳者・記憶の編集者・やさしい伴走者。決めつけず、急かさず、感動を押し売りしない。文体：丁寧なですます調、温かいが熱すぎない、少し詩的だが意味は明確。
+
+以下の情報をもとに、JSONのみを返してください。コードブロックや前置きは不要です。
+
+お客様のお名前：${userName}
+贈り物：${isGift?'はい（'+giftTo+'）':'自分のために残したい'}
+写真の主題（人・動物・モノ・場所など）：${q1}
+選んだ理由：${q2}
+関係：${dq('dq1')||'未入力'} / 時間：${dq('dq2')||'未入力'} / 感情：${dq('dq3')||'未入力'}
+贈る意味：${dq('dq4')||'未入力'} / 未来：${dq('dq5')||'未入力'}
+
+各候補は次のJSONスキーマに厳密に従ってください：
+- type: "シンプル" | "詩的" | "感謝"
+- title: タイトル（4〜16字程度。**文節として意味が完結した名詞句であること**。語尾が「〜てい」「〜の」など中途半端に終わらないこと。例：「三春のこと」「祖父の手」「夏の光」「あの日の海」）
+- author_suggestion: 作家名の提案（写真の主役の名前があれば、それを優先。例：ペットなら「三春」「ハナ」、人物なら名前。提案できなければお客様のお名前「${userName}」、それも違和感があれば空文字）
+- place_suggestion: 場所の提案（**Q1・Q2・5つの問いから少しでも推測できる場合は積極的に提案**。例：「東京」「祖父母の家、福岡」など。完全に推測不可能な場合のみ空文字。3案で表現を変えてもよい）
+- date_suggestion: 日付の提案（**Q1・Q2・5つの問いから少しでも推測できる場合は積極的に提案**。例：「2024年夏」「2014年9月〜2024年7月」など。完全に推測不可能な場合のみ空文字。3案で表現を変えてもよい）
+- body: 本文（150〜280字程度の物語的な文章。**重要：必ず2〜4行ごとに改行（\\n）を入れ、段落間は空行（\\n\\n）で区切る。各行は短めに整え、20行以内に収める。視覚的に呼吸のある美しい配置にする**）
+- description: 作品説明（30〜70字程度の補足。サブタイトル的なフレーズや、本文の余韻を残す短い言葉。空欄でもよい場合は空文字）
+
+3つの候補のキャラクター：
+- シンプル：感情を静かに凝縮した、力強く飾らない言葉。本文は事実と感情の核だけを残す。
+- 詩的：情景・光・時間を感じる余白ある表現。本文は比喩や情景描写を含む。
+- 感謝：${isGift?'贈る相手への静かな呼びかけ':'大切な存在への感謝として読める言葉'}。本文は語りかけの形を含む。
+
+{"interpretation":"（${userName}さんへ。書き出し「${userName}さん、大切な想いを聞かせてくださり、ありがとうございます。」から始まる5段落・900〜1100字のメッセージ。段落間は空行（\\n\\n）。enisuruの人格で、お客様の想いを深く解釈した内容。）","candidates":[{"type":"シンプル","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""},{"type":"詩的","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""},{"type":"感謝","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""}]}`;
+
+  try{
+    let result;
+    if(ANTHROPIC_API_KEY && !ANTHROPIC_API_KEY.includes('ここを書き換え')){
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key':ANTHROPIC_API_KEY,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+      });
+      if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error('API '+resp.status+': '+(e?.error?.message||''));}
+      const data=await resp.json();
+      const raw=data.content[0].text.trim();
+      const j1=raw.indexOf('{'),j2=raw.lastIndexOf('}');
+      if(j1<0||j2<0)throw new Error('JSON not found');
+      result=JSON.parse(raw.slice(j1,j2+1));
+    } else if(typeof window.anthropic!=='undefined'){
+      const resp=await window.anthropic.messages.create({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]});
+      const raw=resp.content[0].text.trim();
+      const j1=raw.indexOf('{'),j2=raw.lastIndexOf('}');
+      if(j1<0||j2<0)throw new Error('JSON not found');
+      result=JSON.parse(raw.slice(j1,j2+1));
+    } else {
+      await new Promise(r=>setTimeout(r,3500));
+      result=makeSample(userName,q1,q2,isGift,giftTo,dq('dq1'),dq('dq3'),dq('dq4'));
+    }
+    clearInterval(iv);
+    document.getElementById('interpText').textContent=result.interpretation;
+    const grid=document.getElementById('candGrid');
+    grid.innerHTML='';
+    result.candidates.forEach((c,i)=>{
+      const div=document.createElement('div');
+      div.className='cand';div.id='cand'+i;
+      const labels=['案 A　—　シンプル','案 B　—　詩的','案 C　—　感謝'];
+      const bodyPreview=(c.body||'').replace(/\n/g,' ').slice(0,80)+(((c.body||'').length>80)?'…':'');
+      div.innerHTML=`<div class="cand-type">${labels[i]}</div><div class="cand-title">${escapeHtml(c.title||'')}</div><div class="cand-desc">${escapeHtml(bodyPreview)}</div>${c.description?`<div class="cand-sub">— ${escapeHtml(c.description)}</div>`:''}`;
+      div.onclick=()=>pickCand(i,c);
+      grid.appendChild(div);
+    });
+    document.getElementById('editSection').style.display='none';
+    const btnReset=document.getElementById('goFinalBtn');
+    if(btnReset){btnReset.disabled=true;btnReset.textContent='キャプションを選んでください';}
+    go(4,3); // S4: interpretation screen first
+  }catch(e){
+    clearInterval(iv);go(2,2);
+    const err=document.getElementById('qErr');
+    err.textContent='もう一度お試しください。（'+( e.message||'エラー')+'）';
+    err.style.display='block';
+  }
+}
+
+function makeSample(userName,q1,q2,isGift,giftTo,dq1,dq3,dq4){
+  const s=q1||'その存在';const r=q2||'この写真の記憶';const recv=isGift?giftTo:'あなた自身';
+  const bodyA=`${s}と過ごしたあの時間が、ここにある。\n\n声も匂いも、あの日の光も、\n時間が経つほどに記憶の中で深くなっていく。\n\nこの一枚を選んだのは、\nたぶん理由ではなく、\n心が知っていたから。`;
+  const bodyB=`あの日の光は、\nどんな色をしていただろう。\n\n${s}がそこにいたとき、\n空気はどんな温度だったろう。\n\n写真の中の時間は流れない。\nだからこそ、ここにはいつでも帰ってこられる。\n\n絵になっても、\nその温度だけは残っている。`;
+  const bodyC=`${isGift?recv+'へ。\n\n':''}伝えきれなかった「ありがとう」が、\nまだたくさんある気がしている。\n\nこの絵を見るたびに、\nその言葉の続きを思い出してほしい。\n\nあなたがそこにいてくれたこと、\n一緒にいられたこと——\nそれだけで、十分すぎるほどだった。`;
+  // タイトルは自然なカットで、最大12文字
+  const titleA = s.length <= 12 ? s : s.slice(0, 10);
+  // 「への」で終わらないクリーンなタイトル
+  const recvClean = recv.replace(/[へのをにはが。、]+$/, '');
+  const titleC = isGift ? recvClean.slice(0, 8) + 'へ' : 'ありがとう';
+  return{
+    interpretation:`${userName}さん、大切な想いを聞かせてくださり、ありがとうございます。\n\n${s}が写っているこの一枚を、enisuruはゆっくりと受け取りました。写真の中に静かに存在している光、その場所の温度、シャッターを切った瞬間にあなたが感じていたこと——言葉にしなくても、それはちゃんとここにあると感じます。\n\n「${s}」という言葉を読んだとき、enisuruはその存在があなたにとって単純な懐かしさだけでは語り尽くせないものだと感じました。${dq1?'「'+dq1.slice(0,30)+'」という言葉の中に、':'その関係の深さの中に、'}長い時間をかけて積み上げられた信頼や愛情が、静かに宿っているように思えます。\n\n「${r}」——この言葉を、enisuruはとても丁寧に受け取りました。写真を選ぶとき、人は理由を探すのではなく、理由に気づくのだと思っています。${dq3?'「'+dq3.slice(0,20)+'」という感覚は、':'その胸の奥に残るものは、'}つながりの深さの証のように感じます。\n\n${isGift?recv+'への贈り物として届けることを選んでくださったこと——それ自体が、言葉よりも深い形だとenisuruは思います。':'この写真を絵という形で残すことを選んでくださった。それは、あの時間をただの過去にしないという、静かな意志だとenisuruは受け取っています。'}\n\nenisuruは、今日あなたが話してくださった言葉を一つも忘れずに、この作品を仕上げます。届いたとき、「これだ」とそっと感じていただけるよう、丁寧に。`,
+    candidates:[
+      {type:'シンプル',title:titleA,author_suggestion:userName,place_suggestion:'',date_suggestion:'',body:bodyA,description:'記憶の核に残る、ひとつの存在。'},
+      {type:'詩的',title:'光の中で',author_suggestion:userName,place_suggestion:'',date_suggestion:'',body:bodyB,description:'時間が止まる場所、写真という記憶。'},
+      {type:'感謝',title:titleC,author_suggestion:userName,place_suggestion:'',date_suggestion:'',body:bodyC,description:isGift?'贈るための、静かな手紙。':'この時間にあった、すべてへ。'}
+    ]
+  };
+}
+
+function pickCand(i,c){
+  document.querySelectorAll('.cand').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('cand'+i).classList.add('sel');
+  selCand=c;
+  const userName=document.getElementById('userName').value.trim();
+  document.getElementById('editTitle').value=c.title||'';
+  document.getElementById('editAuthor').value=c.author_suggestion||userName||'';
+  document.getElementById('editPlace').value=c.place_suggestion||'';
+  document.getElementById('editDate').value=c.date_suggestion||'';
+  document.getElementById('editBody').value=c.body||'';
+  document.getElementById('editDescr').value=c.description||'';
+  countBody();
+  const es=document.getElementById('editSection');
+  es.style.display='block';
+  // 仕上げボタンを有効化＆ラベルを変更
+  const btn=document.getElementById('goFinalBtn');
+  if(btn){btn.disabled=false;btn.textContent='このキャプションで仕上げてもらう';}
+  setTimeout(()=>es.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+function applyImpressionist(src,cb){
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=function(){
+    const W=img.naturalWidth,H=img.naturalHeight;
+    const c=document.getElementById('workCanvas');c.width=W;c.height=H;
+    const ctx=c.getContext('2d');ctx.drawImage(img,0,0,W,H);
+    const orig=ctx.getImageData(0,0,W,H);const d=orig.data;
+    function gray(x,y){if(x<0||x>=W||y<0||y>=H)return 0;const idx=(y*W+x)*4;return 0.299*d[idx]+0.587*d[idx+1]+0.114*d[idx+2];}
+    const sob=new Float32Array(W*H);let mx=1;
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const gx=-gray(x-1,y-1)+gray(x+1,y-1)-2*gray(x-1,y)+2*gray(x+1,y)-gray(x-1,y+1)+gray(x+1,y+1);const gy=-gray(x-1,y-1)-2*gray(x,y-1)-gray(x+1,y-1)+gray(x-1,y+1)+2*gray(x,y+1)+gray(x+1,y+1);const s=Math.sqrt(gx*gx+gy*gy);sob[y*W+x]=s;if(s>mx)mx=s;}
+    const em=new Float32Array(W*H);for(let i=0;i<W*H;i++)em[i]=sob[i]/mx;
+    const pt=ctx.createImageData(W,H);const pd=pt.data;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const idx=(y*W+x)*4;const sx=Math.min(W-1,Math.max(0,x+Math.round((Math.random()-.5)*7)));const sy=Math.min(H-1,Math.max(0,y+Math.round((Math.random()-.5)*7)));const si=(sy*W+sx)*4;const n=(Math.random()-.5)*34;pd[idx]=Math.min(255,Math.max(0,d[si]+n));pd[idx+1]=Math.min(255,Math.max(0,d[si+1]+n));pd[idx+2]=Math.min(255,Math.max(0,d[si+2]+n));pd[idx+3]=255;}
+    const bl=ctx.createImageData(W,H);const bd=bl.data;const et=0.18;
+    for(let i=0;i<W*H;i++){const e=em[i];const a=Math.min(1,e/et);const ii=i*4;bd[ii]=Math.round(d[ii]*a+pd[ii]*(1-a));bd[ii+1]=Math.round(d[ii+1]*a+pd[ii+1]*(1-a));bd[ii+2]=Math.round(d[ii+2]*a+pd[ii+2]*(1-a));bd[ii+3]=255;}
+    ctx.putImageData(bl,0,0);
+    for(let k=0;k<900;k++){const x=Math.random()*W,y=Math.random()*H;const px=Math.floor(x),py=Math.floor(y);if(px<0||px>=W||py<0||py>=H)continue;if(em[py*W+px]>et)continue;const si=(py*W+px)*4;const len=8+Math.random()*22;const angle=Math.random()*Math.PI;ctx.save();ctx.globalAlpha=(0.08+Math.random()*0.18)*(1-em[py*W+px]/et);ctx.strokeStyle=`rgb(${d[si]},${d[si+1]},${d[si+2]})`;ctx.lineWidth=1.5+Math.random()*4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-Math.cos(angle)*len/2,y-Math.sin(angle)*len/2);ctx.lineTo(x+Math.cos(angle)*len/2,y+Math.sin(angle)*len/2);ctx.stroke();ctx.restore();}
+    const fc=document.createElement('canvas');fc.width=W;fc.height=H;const fCtx=fc.getContext('2d');fCtx.filter='saturate(1.28) contrast(0.90) brightness(1.05)';fCtx.drawImage(c,0,0);
+    cb(fc.toDataURL('image/jpeg',0.92));
+  };
+  img.onerror=()=>cb(src);img.src=src;
+}
+
+function extractDominantColor(src,cb){
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=function(){
+    const W=img.naturalWidth,H=img.naturalHeight;
+    const sw=80,sh=Math.max(1,Math.round(80*H/W));
+    const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
+    const ctx=tmp.getContext('2d');
+    try{ctx.drawImage(img,0,0,sw,sh);}catch(e){cb(null);return;}
+    let data;
+    try{data=ctx.getImageData(0,0,sw,sh).data;}catch(e){cb(null);return;}
+    let r=0,g=0,b=0,totalW=0;
+    for(let i=0;i<data.length;i+=4){
+      const R=data[i],G=data[i+1],B=data[i+2];
+      const max=Math.max(R,G,B),min=Math.min(R,G,B);
+      const sat=max===0?0:(max-min)/max;
+      // 彩度の高い画素を重視。極端な黒・白は弱める
+      const lum=(R+G+B)/3;
+      const lumWeight=lum<20||lum>235?0.15:1.0;
+      const w=(0.25+sat*1.5)*lumWeight;
+      r+=R*w;g+=G*w;b+=B*w;totalW+=w;
+    }
+    if(totalW<=0){cb(null);return;}
+    cb([r/totalW,g/totalW,b/totalW]);
+  };
+  img.onerror=()=>cb(null);img.src=src;
+}
+
+function nearestPaletteIdx(rgb){
+  if(!rgb)return 4;
+  let bestI=0,bestD=Infinity;
+  COLOR_PALETTE.forEach((c,i)=>{
+    const r=parseInt(c.hex.slice(1,3),16);
+    const g=parseInt(c.hex.slice(3,5),16);
+    const b=parseInt(c.hex.slice(5,7),16);
+    const dr=r-rgb[0],dg=g-rgb[1],db=b-rgb[2];
+    const d=dr*dr+dg*dg+db*db;
+    if(d<bestD){bestD=d;bestI=i;}
+  });
+  return bestI;
+}
+
+function buildColorPicker(){
+  const grid=document.getElementById('colorGrid');
+  grid.innerHTML='';
+  COLOR_PALETTE.forEach((c,i)=>{
+    const sw=document.createElement('div');
+    sw.className='color-swatch'+(i===selColorIdx?' sel':'');
+    sw.style.background=c.hex;
+    sw.title=c.name+'　No.'+c.no+'　'+c.hex;
+    sw.onclick=()=>selectColor(i);
+    grid.appendChild(sw);
+  });
+  updateColorLabel();
+}
+function selectColor(i){
+  selColorIdx=i;
+  document.querySelectorAll('.color-swatch').forEach((el,j)=>{
+    el.classList.toggle('sel',j===i);
+  });
+  document.getElementById('fcCaptionArea').style.background=COLOR_PALETTE[i].hex;
+  updateColorLabel();
+}
+function updateColorLabel(){
+  const c=COLOR_PALETTE[selColorIdx];
+  document.getElementById('colorCurrent').textContent=`${c.name} ${c.hex}　No.${c.no}`;
+}
+
+function goToFinal(){
+  if(!selCand){alert('キャプションを選んでください。');return;}
+  const title=document.getElementById('editTitle').value.trim()||selCand.title;
+  const author=document.getElementById('editAuthor').value.trim();
+  const place=document.getElementById('editPlace').value.trim();
+  const date=document.getElementById('editDate').value.trim();
+  const body=document.getElementById('editBody').value.trim()||selCand.body;
+  const descr=document.getElementById('editDescr').value.trim();
+
+  document.getElementById('fcTitle').textContent=title;
+
+  // Meta lines: 作家名・場所・日付を縦並びでラベルなし表示（スクリーンショットの形式）
+  const metaEl=document.getElementById('fcMeta');
+  const metaLines=[];
+  if(author)metaLines.push(`<div class="fc-meta-line">${escapeHtml(author)}</div>`);
+  if(place)metaLines.push(`<div class="fc-meta-line">${escapeHtml(place)}</div>`);
+  if(date)metaLines.push(`<div class="fc-meta-line">${escapeHtml(date)}</div>`);
+  metaEl.innerHTML=metaLines.join('');
+
+  document.getElementById('fcBody').textContent=body;
+
+  const descrEl=document.getElementById('fcDesc');
+  if(descr){descrEl.textContent='— '+descr;descrEl.style.display='block';}
+  else{descrEl.style.display='none';}
+
+  const wrap=document.getElementById('fcPhotoWrap');
+  wrap.style.paddingTop=orient==='portrait'?'144%':'69.4%';
+
+  // デフォルトの背景色は「生成色 #F0E8DD No.3」に固定
+  // ご自身で作品の象徴的な色に近い色を25色から選んでいただきます
+  selColorIdx=2;
+  document.getElementById('fcCaptionArea').style.background=COLOR_PALETTE[selColorIdx].hex;
+  buildColorPicker();
+
+  if(photoBlobUrl){
+    wrap.innerHTML='<img style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" src="'+photoBlobUrl+'">';
+  }
+  go(5,3);
+}
+
+async function submitOrder(){
+  const email=document.getElementById('custEmail').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const zip=document.getElementById('custZip').value.trim();
+  const address=document.getElementById('custAddress').value.trim();
+  const message=document.getElementById('custMessage').value.trim();
+  const errEl=document.getElementById('contactErr');
+
+  if(!email||!phone||!address){
+    errEl.textContent='メールアドレス・お電話番号・お届け先住所をご入力ください。';
+    errEl.style.display='block';
+    return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    errEl.textContent='メールアドレスの形式をご確認ください。';
+    errEl.style.display='block';
+    return;
+  }
+  errEl.style.display='none';
+
+  const endpoint=GAS_ENDPOINT||GAS_WEBAPP_URL;
+  if(!endpoint||endpoint.includes('ここを書き換え')){
+    errEl.textContent='送信先が設定されていません。GAS_ENDPOINTをご確認ください。';
+    errEl.style.display='block';
+    return;
+  }
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.textContent='送信しています...';
+
+  const userName=document.getElementById('userName').value.trim();
+  const dq=id=>document.getElementById(id)?document.getElementById(id).value.trim():'';
+  const giftTo=isGift?(document.getElementById('giftTo').value.trim()||''):'';
+  const interpretation=document.getElementById('interpText')?document.getElementById('interpText').textContent:'';
+  const color=COLOR_PALETTE[selColorIdx];
+
+  // 選択されたプレビュー画像（変換後）
+  const selectedPhoto=uploadedPhotos[selectedPreviewIdx];
+  const previewBase64=selectedPhoto?.preview
+    ?(selectedPhoto.preview.replace(/^data:image\/[a-z]+;base64,/,''))
+    :'';
+
+  const payload={
+    action:'submitOrder',
+    userName,email,phone,zip,address,message,
+    q1:dq('q1'),q2:dq('q2'),
+    isGift:!!isGift,giftTo,
+    usecase,
+    mode: selectedMode===1?'静かな一言の作品':selectedMode===2?'言葉のない作品':'物語が宿る作品',
+    sku:selectedSku,
+    dq1:dq('dq1'),dq2:dq('dq2'),dq3:dq('dq3'),dq4:dq('dq4'),dq5:dq('dq5'),
+    candidateType:selCand?selCand.type:'',
+    interpretation,
+    title:document.getElementById('editTitle')?document.getElementById('editTitle').value.trim():'',
+    author:document.getElementById('editAuthor')?document.getElementById('editAuthor').value.trim():'',
+    place:document.getElementById('editPlace')?document.getElementById('editPlace').value.trim():'',
+    date:document.getElementById('editDate')?document.getElementById('editDate').value.trim():'',
+    body:document.getElementById('editBody')?document.getElementById('editBody').value.trim():'',
+    descr:document.getElementById('editDescr')?document.getElementById('editDescr').value.trim():'',
+    colorName:color?color.name:'',colorHex:color?color.hex:'',colorNo:color?color.no:'',
+    orientation:orient||'',
+    photoBase64:(photoBlobUrl&&photoBlobUrl.indexOf('data:')===0)?photoBlobUrl.replace(/^data:image\/[a-z]+;base64,/,''):'',
+    previewBase64,
+    submittedAt:new Date().toISOString()
+  };
+
+  try{
+    const resp=await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload),
+      redirect:'follow'
+    });
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const result=await resp.json();
+    if(!result.success&&!result.ok)throw new Error(result.error||'送信に失敗しました');
+
+    // 注文番号を表示
+    if(result.orderId){
+      const el=document.getElementById('orderIdDisplay');
+      if(el)el.textContent=result.orderId;
+      const blk=document.getElementById('orderIdBlock');
+      if(blk)blk.style.display='block';
+    }
+
+    // Shopify Cart Permalink にリダイレクト
+    if(result.shopifyUrl&&!result.shopifyUrl.includes('example.myshopify')){
+      _shopifyRedirectUrl=result.shopifyUrl;
+      const sbtn=document.getElementById('shopifyBtn');
+      if(sbtn)sbtn.style.display='block';
+      go(7,4);
+      // 3秒後にShopifyへ遷移
+      setTimeout(()=>{ window.location.href=result.shopifyUrl; }, 3000);
+    } else {
+      go(7,4);
+    }
+  }catch(e){
+    errEl.textContent='送信に失敗しました。もう一度お試しください。（'+(e.message||'通信エラー')+'）';
+    errEl.style.display='block';
+    btn.disabled=false;
+    btn.textContent='enisuruに送る';
+  }
+}
+
+function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function resetAll(){
+  isGift=null;orient=null;selCand=null;photoBlobUrl='';selColorIdx=2;
+  // v15 reset
+  usecase='gift';uploadedPhotos=[null,null,null];selectedPreviewIdx=null;selectedSku='classic-sm';
+  ['q1','q2','dq1','dq2','dq3','dq4','dq5','userName','photoUrl','giftTo','editTitle','editAuthor','editPlace','editDate','editBody','editDescr','custEmail','custPhone','custZip','custAddress','custMessage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const pa=document.getElementById('photoArea');if(pa)pa.innerHTML='<span class="photo-drop-label">写真を選ぶ</span><span class="photo-drop-sub">jpg・png・heic など</span>';
+  document.getElementById('giftDetail').style.display='none';
+  document.getElementById('editSection').style.display='none';
+  document.getElementById('gYes').className='tb';document.getElementById('gNo').className='tb';
+  document.getElementById('opLand').className='op';document.getElementById('opPort').className='op';
+  document.getElementById('deepQs').classList.remove('show');document.getElementById('dtIcon').classList.remove('open');
+  const dtActText=document.getElementById('dtActionText');if(dtActText)dtActText.textContent='開く';
+  const dtTog=document.querySelector('.deep-toggle');if(dtTog)dtTog.classList.remove('open');
+  document.getElementById('qErr').style.display='none';
+  const ce=document.getElementById('contactErr');if(ce){ce.style.display='none';ce.textContent='';}
+  const sb=document.getElementById('submitBtn');if(sb){sb.disabled=false;sb.textContent='enisuruに送る';}
+  const oib=document.getElementById('orderIdBlock');if(oib)oib.style.display='none';
+  // v15 reset UI
+  setUsecase('gift');
+  renderSlots();
+  updateS1Button();
+  setSku('classic-sm');
+  const fcw=document.getElementById('fcPhotoWrap');if(fcw)fcw.innerHTML='<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--green-pale);"><span class="serif" style="font-size:12px;letter-spacing:0.3em;color:var(--green-mid);">e n i s u r u</span></div>';
+  go(1,1);
+}
+</script>
+</body>
+</html>
