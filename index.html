@@ -1095,9 +1095,9 @@ function onMultiFile(inp){
     const r=new FileReader();
     const slotIdx=i;
     r.onload=e=>{
-      uploadedPhotos[slotIdx]={data:e.target.result,preview:null,status:'processing'};
+      // 写真は保持するだけ。実際の変換は「次に進む」ボタン押下時に行う
+      uploadedPhotos[slotIdx]={data:e.target.result,preview:null,status:'pending'};
       renderSlots();
-      processPhoto(slotIdx);
       updateS1Button();
     };
     r.readAsDataURL(f);
@@ -1253,7 +1253,14 @@ async function goToPreview(){
   showS1Converting(true);
 
   try{
-    // Wait for any processing to finish
+    // ボタン押下時に、未変換の写真をまとめてGemini変換する
+    const toProcess=filled.filter(i=>uploadedPhotos[i]&&!uploadedPhotos[i].preview&&uploadedPhotos[i].status!=='processing');
+    toProcess.forEach(i=>{ uploadedPhotos[i].status='processing'; });
+    if(toProcess.length){
+      renderSlots();
+      await Promise.all(toProcess.map(i=>processPhoto(i)));
+    }
+    // 念のため、まだ処理中のものがあれば待つ
     while(uploadedPhotos.some(p=>p&&p.status==='processing')){
       await new Promise(r=>setTimeout(r,200));
     }
