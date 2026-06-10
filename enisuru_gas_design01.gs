@@ -18,28 +18,43 @@ const GEMINI_MODEL = 'gemini-2.5-flash-image';
 
 // 注文保存先
 const SPREADSHEET_ID    = '1x-_7Xqd-bs_4r6UogT6iEVAhy-3eXOYj0S8a7caYJjI';
-const DRIVE_FOLDER_ID   = 'ここを書き換えてください'; // ★ 新規フォルダ作成後にIDを設定
-const ORDER_SHEET_NAME  = '注文一覧_design01';
+const DRIVE_FOLDER_ID   = '1Xg2UzjcdhOrRUX5oSCrbY5jv00lhqrnn'; // ★ 新規フォルダ作成後にIDを設定
+// 列構成を拡張したため新しいシートに切り替え（旧 '注文一覧_design01' は保持・参照可）。
+// 初回送信時に下記ORDER_COLUMNSの見出しで自動作成される。
+const ORDER_SHEET_NAME  = '注文一覧_design01_v2';
 
 // 注文シートのカラム定義: { header: シート見出し, key: ペイロードキー }
 // key が null の列 (写真/プレビュー Drive URL) は submitOrder では空文字で書き、
-// savePhotos が orderId 行を見つけて後から埋める。
+// savePhotos が orderId 行を見出し名で見つけて後から埋める。
+// ※ フロント(v15 HTML)の submitOrder ペイロードのキー名と完全一致させること。
 const ORDER_COLUMNS = [
   { header: '注文番号',             key: 'orderId' },
   { header: '受付日時',             key: 'submittedAt' },
   { header: 'お名前',               key: 'userName' },
   { header: 'メールアドレス',       key: 'email' },
   { header: '電話番号',             key: 'phone' },
-  { header: '用途',                 key: 'usecaseLabel' },
+  { header: '郵便番号',             key: 'zip' },
+  { header: 'お届け先住所',         key: 'address' },
+  { header: 'ご連絡事項',           key: 'message' },
+  { header: '用途',                 key: 'usecaseLabel' }, // self/gift を日本語化（handleSubmitOrderで生成）
+  { header: '贈り先',               key: 'giftTo' },
   { header: '仕上げモード',         key: 'mode' },
   { header: 'SKU',                  key: 'sku' },
   { header: '向き',                 key: 'orientation' },
+  { header: 'カラー名',             key: 'colorName' },
+  { header: 'カラー番号',           key: 'colorNo' },
   { header: '被写体',               key: 'q1' },
   { header: '選んだ理由',           key: 'q2' },
-  { header: '贈り物',               key: 'giftTo' },
+  { header: '深掘りQ1',             key: 'dq1' },
+  { header: '深掘りQ2',             key: 'dq2' },
+  { header: '深掘りQ3',             key: 'dq3' },
+  { header: '深掘りQ4',             key: 'dq4' },
+  { header: '深掘りQ5',             key: 'dq5' },
+  { header: 'enisuruの解釈',        key: 'interpretation' },
   { header: 'キャプション種別',     key: 'candidateType' },
   { header: 'タイトル',             key: 'title' },
   { header: '本文',                 key: 'body' },
+  { header: '説明文',               key: 'descr' },
   { header: '作者名',               key: 'author' },
   { header: '場所',                 key: 'place' },
   { header: '日付',                 key: 'date' },
@@ -267,6 +282,10 @@ function handleSubmitOrder(body) {
 
     const enriched = Object.assign({}, body, { orderId: orderId });
     if (!enriched.submittedAt) enriched.submittedAt = now.toISOString();
+    // 用途コード(self/gift) を日本語ラベルに変換（フロントは usecase を送る）
+    enriched.usecaseLabel = enriched.usecase === 'self' ? 'ご自身用'
+                          : enriched.usecase === 'gift' ? '贈り物'
+                          : (enriched.usecase || '');
 
     const row = ORDER_COLUMNS.map(function(c) {
       if (!c.key) return ''; // 写真/プレビュー Drive URL は savePhotos が後で埋める

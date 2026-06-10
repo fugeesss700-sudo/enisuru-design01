@@ -1396,16 +1396,9 @@ function syncPhotoBlobUrl(){
 async function autoDetectOrient(){
   const p=uploadedPhotos[selectedPreviewIdx];
   if(!p)return;
-  await new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>{
-      orient=img.width>=img.height?'landscape':'portrait';
-      setOrient(orient);
-      resolve();
-    };
-    img.onerror=resolve;
-    img.src=p.data;
-  });
+  // processPhotoで判定済みの向きがあれば優先。なければEXIF補正後の実寸法で判定。
+  orient = p.orient || await detectOrientFromDataUrl(p.data);
+  setOrient(orient);
 }
 
 // S2T: タイトル入力（静かな一言）
