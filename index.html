@@ -1144,19 +1144,23 @@ async function processPhoto(idx){
   try{
     let previewData;
     if(GAS_ENDPOINT){
-      // 送信前に画像を圧縮（GASのペイロード制限対策）
+      // 送信前に画像を圧縮（GASのペイロード制限対策）＋EXIF回転補正
       const compressed = await compressImage(p.data, 1200, 0.85);
       const base64Clean=compressed.replace(/^data:image\/[a-z]+;base64,/,'');
       const mimeType='image/jpeg';
       const subject=document.getElementById('q1')?document.getElementById('q1').value.trim():'';
-      console.log(`[processPhoto] GASへ送信 base64長=${base64Clean.length}`);
+      // この写真自体の向きを判定（グローバルorientはこの時点で未確定のため使わない）。
+      // 縦写真には縦のサイズ指定でGeminiに変換させ、横変換されるのを防ぐ。
+      const photoOrient = await detectOrientFromDataUrl(compressed);
+      uploadedPhotos[idx].orient = photoOrient;
+      console.log(`[processPhoto] GASへ送信 base64長=${base64Clean.length} orient=${photoOrient}`);
       const res=await fetch(GAS_ENDPOINT,{
         method:'POST',
         headers:{'Content-Type':'text/plain;charset=utf-8'},
         body:JSON.stringify({
           action:'generatePreviews',
           photos:[{data:base64Clean,mimeType}],
-          orient:orient||'landscape',
+          orient:photoOrient,
           subject,
         }),
         redirect:'follow'
@@ -1193,23 +1197,55 @@ async function processPhoto(idx){
   }
 }
 
-// 画像を指定サイズ・品質に圧縮してJPEGのdataURLを返す
-function compressImage(dataUrl, maxSize, quality){
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>{
-      const c=document.createElement('canvas');
-      let w=img.width, h=img.height;
-      if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
-      else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
-      c.width=w; c.height=h;
-      const ctx=c.getContext('2d');
-      ctx.drawImage(img,0,0,w,h);
-      resolve(c.toDataURL('image/jpeg', quality));
-    };
-    img.onerror=()=>resolve(dataUrl);
-    img.src=dataUrl;
-  });
+// createImageBitmap({imageOrientation:'from-image'}) でiPhone等のEXIF回転を補正し、
+// 物理的に正しい向きのピクセルとして焼き込む（変換前・変換後とも縦のまま保存される）
+async function compressImage(dataUrl, maxSize, quality){
+  try{
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    let bitmap;
+    try{ bitmap=await createImageBitmap(blob,{imageOrientation:'from-image'}); }
+    catch(_){ bitmap=await createImageBitmap(blob); }
+    let w=bitmap.width, h=bitmap.height;
+    if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
+    else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
+    const c=document.createElement('canvas');
+    c.width=Math.round(w); c.height=Math.round(h);
+    const ctx=c.getContext('2d');
+    ctx.drawImage(bitmap,0,0,c.width,c.height);
+    if(bitmap.close)bitmap.close();
+    return c.toDataURL('image/jpeg', quality);
+  }catch(err){
+    console.warn('[compressImage] EXIF補正に失敗、従来方式でフォールバック', err);
+    return await new Promise(resolve=>{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        let w=img.width, h=img.height;
+        if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
+        else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
+        c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror=()=>resolve(dataUrl);
+      img.src=dataUrl;
+    });
+  }
+}
+
+// dataURLから「正しい向き」での縦横を判定（EXIF補正後の実寸法ベース）
+async function detectOrientFromDataUrl(dataUrl){
+  try{
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    let bmp;
+    try{ bmp=await createImageBitmap(blob,{imageOrientation:'from-image'}); }
+    catch(_){ bmp=await createImageBitmap(blob); }
+    const o=bmp.width>=bmp.height?'landscape':'portrait';
+    if(bmp.close)bmp.close();
+    return o;
+  }catch(e){ return 'landscape'; }
 }
 function mockPaintedPreview(dataUrl,idx){
   return new Promise(resolve=>{
@@ -1852,12 +1888,19 @@ async function submitOrder(){
     }
 
     // ② savePhotos: 元画像とプレビューをバックグラウンドで送信
-    //    photoBase64 は selectedPhoto.data（変換前の元画像）を使う
-    //    （photoBlobUrl は preview を指している場合があるため使用しない）
     const selectedPhoto=uploadedPhotos[selectedPreviewIdx];
-    const photoBase64=selectedPhoto?.data
-      ?(selectedPhoto.data.replace(/^data:image\/[a-z]+;base64,/,''))
-      :'';
+    // 元画像（変換前）。EXIF回転を補正して正しい向きで保存する。
+    // 制作用に解像度は大きめ（長辺2400px・高品質0.92）。
+    let photoBase64='';
+    if(selectedPhoto&&selectedPhoto.data){
+      try{
+        const orig=await compressImage(selectedPhoto.data,2400,0.92);
+        photoBase64=orig.replace(/^data:image\/[a-z]+;base64,/,'');
+      }catch(e){
+        photoBase64=(selectedPhoto.data.indexOf('data:')===0)
+          ?selectedPhoto.data.replace(/^data:image\/[a-z]+;base64,/,''):'';
+      }
+    }
     const previewBase64=selectedPhoto?.preview
       ?(selectedPhoto.preview.replace(/^data:image\/[a-z]+;base64,/,''))
       :'';
