@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- enisuru standalone v20 (一般向け / design01)
+     base: v19 + 統合 — F4推奨 / メール・電話入力欄 / 補足注釈 / SNS紹介同意
+     既存(v19): EXIF向き補正・生成中表示・アップロード時非生成・Bug①(savePhotos分離) -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -39,7 +42,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-se
 .field-note{font-size:12px;color:var(--ink-light);line-height:1.75;margin-bottom:6px;padding:0;background:transparent;border:none;}
 .field-note strong{color:var(--ink-mid);font-weight:500;}
 .field-example{font-size:11.5px;color:var(--ink-hint);margin-top:6px;line-height:1.6;font-style:italic;}
-input[type=text],input[type=url],textarea{width:100%;padding:12px 14px;border:0.5px solid var(--border-mid);border-radius:2px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--cream);line-height:1.6;resize:vertical;appearance:none;transition:border-color .2s,background .2s;}
+input[type=text],input[type=email],input[type=tel],input[type=url],textarea{width:100%;padding:12px 14px;border:0.5px solid var(--border-mid);border-radius:2px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--cream);line-height:1.6;resize:vertical;appearance:none;transition:border-color .2s,background .2s;}
 input:focus,textarea:focus{outline:none;border-color:var(--green-mid);background:#fff;}
 textarea{min-height:78px;}
 .sub-note{font-size:11.5px;color:var(--ink-hint);margin-top:6px;line-height:1.6;}
@@ -200,6 +203,7 @@ textarea{min-height:78px;}
 .preview-modal-close{position:absolute;top:-16px;right:-16px;width:34px;height:34px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:18px;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;line-height:1;}
 .preview-modal-label{color:rgba(255,255,255,0.65);font-size:11px;margin-top:12px;letter-spacing:0.12em;}
 .prev-img{cursor:zoom-in;}
+.prev-zoom-hint{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.45);color:#fff;font-size:9px;padding:2px 5px;border-radius:2px;letter-spacing:0.06em;pointer-events:none;}
 
 /* Use-case toggle */
 .usecase-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;padding:18px 20px;margin-bottom:14px;}
@@ -427,6 +431,12 @@ textarea{min-height:78px;}
     <div class="card-eyebrow">Step I 続き — お好みの一枚を選ぶ</div>
     <div class="card-greeting serif">enisuruからのプレビュー</div>
     <div class="card-body">お好みの一枚をお選びください。実際の作品もこの仕上がりをもとにお作りします。</div>
+
+    <div style="background:var(--gold-pale);border:0.5px solid var(--gold-border);border-radius:2px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--ink-mid);line-height:1.85;">
+      ※ これはAIによる自動プレビューです。<br>
+      実際の作品は職人が一点ずつ丁寧に手仕上げいたします。<br>
+      <span style="color:var(--ink-hint);">色味・質感・細部は完成品でさらに深まります。</span>
+    </div>
 
     <div class="previews-grid" id="previewsGrid"></div>
 
@@ -740,7 +750,7 @@ textarea{min-height:78px;}
   <div class="card">
     <div class="card-eyebrow">Step VI — サイズと装丁</div>
     <div class="card-greeting serif">お部屋や贈り方に合わせてお選びください。</div>
-    <div class="card-body">迷ったら Classic SM がおすすめです（最も手に取りやすいサイズ）。</div>
+    <div class="card-body">迷ったら <strong>F4 サイズ</strong>がおすすめです。壁掛けや贈り物にも映え、enisuru の世界が最も伝わる大きさです。</div>
 
     <!-- Size compare panel -->
     <div class="compare-panel">
@@ -767,7 +777,7 @@ textarea{min-height:78px;}
           </div>
         </div>
       </div>
-      <div class="compare-caption">SM: 卓上・本棚に置いて毎日眺める　F4: 壁掛けや贈り物に・存在感が欲しい時に</div>
+      <div class="compare-caption">SM: 卓上・本棚に置いて毎日眺める　F4: 壁掛けや贈り物に・存在感が欲しい時に　── <strong>おすすめは F4</strong> です。</div>
     </div>
 
     <!-- Finish compare panel -->
@@ -827,18 +837,18 @@ textarea{min-height:78px;}
     <!-- SKU grid -->
     <div class="sku-grid-head">あなたの組み合わせをお選びください</div>
     <div class="sku-grid">
-      <div class="sku-card sel" data-sku="classic-sm" onclick="setSku('classic-sm')">
-        <div class="sku-badge">おすすめ</div>
+      <div class="sku-card" data-sku="classic-sm" onclick="setSku('classic-sm')">
         <div class="sku-line">CLASSIC</div>
         <div class="sku-size">SM</div>
         <div class="sku-price">¥19,800</div>
-        <div class="sku-act">選択中 ✓</div>
+        <div class="sku-act">選ぶ</div>
       </div>
-      <div class="sku-card" data-sku="classic-f4" onclick="setSku('classic-f4')">
+      <div class="sku-card sel" data-sku="classic-f4" onclick="setSku('classic-f4')">
+        <div class="sku-badge">おすすめ</div>
         <div class="sku-line">CLASSIC</div>
         <div class="sku-size">F4</div>
         <div class="sku-price">¥33,800</div>
-        <div class="sku-act">選ぶ</div>
+        <div class="sku-act">選択中 ✓</div>
       </div>
       <div class="sku-card" data-sku="premium-sm" onclick="setSku('premium-sm')">
         <div class="sku-line">PREMIUM</div>
@@ -893,8 +903,18 @@ textarea{min-height:78px;}
 
     <div class="field" style="margin-bottom:0;">
       <span class="fl-jp">ご注文への補足・ご要望 <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（空欄可）</span></span>
-      <div class="field-note">仕上げや配送について、ご希望やご質問があればお書きください。</div>
-      <textarea id="custMessage" rows="3" placeholder="例：誕生日の前日までに届くと嬉しいです／ラッピングしてください"></textarea>
+      <div class="field-note">お届けは2週間程度いただいています。仕上げや配送について、ご希望やご質問があればお書きください。</div>
+      <textarea id="custMessage" rows="3" placeholder="例：子供以外の人はできれば消してください／猫の背景はぼかしてください"></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:0;margin-top:26px;">
+      <span class="fl-jp">作品のご紹介について <span style="color:var(--ink-hint);font-weight:400;font-size:11px;">（任意）</span></span>
+      <div class="field-note">この作品を enisuru の SNS などでご紹介してもよろしいですか？</div>
+      <div style="display:flex;gap:10px;">
+        <div class="op" id="snsYes" onclick="setSnsConsent('yes')" style="font-size:12.5px;line-height:1.6;padding:14px 10px;">はい、紹介しても<br>大丈夫です</div>
+        <div class="op" id="snsNo" onclick="setSnsConsent('no')" style="font-size:12.5px;line-height:1.6;padding:14px 10px;">いいえ、紹介<br>しないでください</div>
+      </div>
+      <div class="field-note" style="margin-top:8px;">※ご紹介させていただく場合、作家名にぼかしを入れるなどして、個人が特定できないようにいたします。</div>
     </div>
 
     <div id="contactErr" class="err"></div>
@@ -984,9 +1004,16 @@ const COLOR_PALETTE = [
 let isGift=null,orient=null,selCand=null,photoBlobUrl='',selColorIdx=2;
 // v15 additions
 let usecase='gift';
+let snsConsent=''; // '', 'yes', 'no'
+function setSnsConsent(v){
+  snsConsent=v;
+  const y=document.getElementById('snsYes'),n=document.getElementById('snsNo');
+  if(y)y.className='op'+(v==='yes'?' sel':'');
+  if(n)n.className='op'+(v==='no'?' sel':'');
+}
 let uploadedPhotos=[null,null,null]; // {data, preview, status}
 let selectedPreviewIdx=null;
-let selectedSku='classic-sm';
+let selectedSku='classic-f4';
 
 // ============================================================
 // ★ 装丁比較の商品写真 URL をここに貼り付けてください ★
@@ -1029,6 +1056,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   const src='data:image/png;base64,'+ENISURU_LOGO_B64;
   const top=document.getElementById('topLogoImg');if(top)top.src=src;
   const fc=document.getElementById('fcLogoImg');if(fc)fc.src=src;
+  // モーダルをbody直下に移動
+  const modal=document.getElementById('previewModal');
+  if(modal&&modal.parentElement!==document.body){document.body.appendChild(modal);}
   // v15: initialize use-case toggle (default: gift)
   setUsecase('gift');
   updateS1Button();
@@ -1086,7 +1116,6 @@ function addPhoto(idx){
 function onMultiFile(inp){
   const files=Array.from(inp.files||[]);
   if(!files.length){inp.value='';return;}
-  // Find empty slots starting from clicked one (or first empty)
   const startIdx=parseInt(inp.dataset.targetIdx||'0',10);
   let i=startIdx;
   for(const f of files){
@@ -1095,8 +1124,8 @@ function onMultiFile(inp){
     const r=new FileReader();
     const slotIdx=i;
     r.onload=e=>{
-      // 写真は保持するだけ。実際の変換は「次に進む」ボタン押下時に行う
-      uploadedPhotos[slotIdx]={data:e.target.result,preview:null,status:'pending'};
+      // status='ready': 変換はまだしない。「次に進む」ボタン押下時にまとめて実行
+      uploadedPhotos[slotIdx]={data:e.target.result,preview:null,status:'ready'};
       renderSlots();
       updateS1Button();
     };
@@ -1144,23 +1173,19 @@ async function processPhoto(idx){
   try{
     let previewData;
     if(GAS_ENDPOINT){
-      // 送信前に画像を圧縮（GASのペイロード制限対策）＋EXIF回転補正
-      const compressed = await compressImage(p.data, 1200, 0.85);
+      // 送信前に画像を圧縮（800px・品質0.72 → 高速化）
+      const compressed = await compressImage(p.data, 800, 0.72);
       const base64Clean=compressed.replace(/^data:image\/[a-z]+;base64,/,'');
       const mimeType='image/jpeg';
       const subject=document.getElementById('q1')?document.getElementById('q1').value.trim():'';
-      // この写真自体の向きを判定（グローバルorientはこの時点で未確定のため使わない）。
-      // 縦写真には縦のサイズ指定でGeminiに変換させ、横変換されるのを防ぐ。
-      const photoOrient = await detectOrientFromDataUrl(compressed);
-      uploadedPhotos[idx].orient = photoOrient;
-      console.log(`[processPhoto] GASへ送信 base64長=${base64Clean.length} orient=${photoOrient}`);
+      console.log(`[processPhoto] GASへ送信 base64長=${base64Clean.length}`);
       const res=await fetch(GAS_ENDPOINT,{
         method:'POST',
         headers:{'Content-Type':'text/plain;charset=utf-8'},
         body:JSON.stringify({
           action:'generatePreviews',
           photos:[{data:base64Clean,mimeType}],
-          orient:photoOrient,
+          orient:orient||'landscape',
           subject,
         }),
         redirect:'follow'
@@ -1197,55 +1222,41 @@ async function processPhoto(idx){
   }
 }
 
-// createImageBitmap({imageOrientation:'from-image'}) でiPhone等のEXIF回転を補正し、
-// 物理的に正しい向きのピクセルとして焼き込む（変換前・変換後とも縦のまま保存される）
+// 画像を指定サイズ・品質に圧縮してJPEGのdataURLを返す
+// createImageBitmap({imageOrientation:'from-image'}) でiPhoneの縦型写真のEXIF回転を補正
 async function compressImage(dataUrl, maxSize, quality){
   try{
-    const res=await fetch(dataUrl);
-    const blob=await res.blob();
-    let bitmap;
-    try{ bitmap=await createImageBitmap(blob,{imageOrientation:'from-image'}); }
-    catch(_){ bitmap=await createImageBitmap(blob); }
-    let w=bitmap.width, h=bitmap.height;
-    if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
-    else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
-    const c=document.createElement('canvas');
-    c.width=Math.round(w); c.height=Math.round(h);
-    const ctx=c.getContext('2d');
-    ctx.drawImage(bitmap,0,0,c.width,c.height);
-    if(bitmap.close)bitmap.close();
+    // fetch() は data: URL にも対応している
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    // imageOrientation:'from-image' でEXIF Orientationを反映した正しい向きのBitmapを取得
+    const bitmap = await createImageBitmap(blob, {imageOrientation:'from-image'});
+    const c = document.createElement('canvas');
+    let w = bitmap.width, h = bitmap.height;
+    if(w > h){ if(w > maxSize){h = Math.round(h*maxSize/w); w = maxSize;} }
+    else       { if(h > maxSize){w = Math.round(w*maxSize/h); h = maxSize;} }
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
     return c.toDataURL('image/jpeg', quality);
-  }catch(err){
-    console.warn('[compressImage] EXIF補正に失敗、従来方式でフォールバック', err);
-    return await new Promise(resolve=>{
-      const img=new Image();
-      img.onload=()=>{
-        const c=document.createElement('canvas');
-        let w=img.width, h=img.height;
-        if(w>h){ if(w>maxSize){h=h*maxSize/w;w=maxSize;} }
-        else { if(h>maxSize){w=w*maxSize/h;h=maxSize;} }
-        c.width=w; c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
+  } catch(e){
+    // createImageBitmap未対応ブラウザ向けフォールバック（EXIFは補正されないが動作は保証）
+    console.warn('[compressImage] createImageBitmap失敗、フォールバック使用:', e.message);
+    return new Promise(resolve=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const c = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if(w > h){ if(w > maxSize){h = Math.round(h*maxSize/w); w = maxSize;} }
+        else       { if(h > maxSize){w = Math.round(w*maxSize/h); h = maxSize;} }
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
         resolve(c.toDataURL('image/jpeg', quality));
       };
-      img.onerror=()=>resolve(dataUrl);
-      img.src=dataUrl;
+      img.onerror = ()=>resolve(dataUrl);
+      img.src = dataUrl;
     });
   }
-}
-
-// dataURLから「正しい向き」での縦横を判定（EXIF補正後の実寸法ベース）
-async function detectOrientFromDataUrl(dataUrl){
-  try{
-    const res=await fetch(dataUrl);
-    const blob=await res.blob();
-    let bmp;
-    try{ bmp=await createImageBitmap(blob,{imageOrientation:'from-image'}); }
-    catch(_){ bmp=await createImageBitmap(blob); }
-    const o=bmp.width>=bmp.height?'landscape':'portrait';
-    if(bmp.close)bmp.close();
-    return o;
-  }catch(e){ return 'landscape'; }
 }
 function mockPaintedPreview(dataUrl,idx){
   return new Promise(resolve=>{
@@ -1289,25 +1300,42 @@ async function goToPreview(){
   showS1Converting(true);
 
   try{
-    // ボタン押下時に、未変換の写真をまとめてGemini変換する
-    const toProcess=filled.filter(i=>uploadedPhotos[i]&&!uploadedPhotos[i].preview&&uploadedPhotos[i].status!=='processing');
-    toProcess.forEach(i=>{ uploadedPhotos[i].status='processing'; });
-    if(toProcess.length){
-      renderSlots();
-      await Promise.all(toProcess.map(i=>processPhoto(i)));
+    // ① 最初の写真から向きを自動検出（EXIF補正後の実寸で判断）
+    await autoDetectOrientFromPhoto(uploadedPhotos[filled[0]].data);
+
+    // ② 全写真を正しい向きでGemini変換（直列で実行）
+    for(const idx of filled){
+      await processPhoto(idx);
     }
-    // 念のため、まだ処理中のものがあれば待つ
-    while(uploadedPhotos.some(p=>p&&p.status==='processing')){
-      await new Promise(r=>setTimeout(r,200));
-    }
-    buildPreviewsGrid(true); // fresh load → reset selection
-    // Auto-detect orientation from first photo's preview/raw
-    await autoDetectOrient();
+
+    // ③ プレビュー画面へ
+    buildPreviewsGrid(true);
     go(1.5,1);
   }finally{
     showS1Converting(false);
     btn.disabled=false;
     btn.textContent='次に進む（プレビューを生成）';
+  }
+}
+
+// 写真の実際の向きをEXIF補正後の寸法から自動検出
+async function autoDetectOrientFromPhoto(dataUrl){
+  try{
+    const res=await fetch(dataUrl);
+    const blob=await res.blob();
+    const bitmap=await createImageBitmap(blob,{imageOrientation:'from-image'});
+    // EXIF補正後の幅・高さで縦横を判断
+    orient=bitmap.width>=bitmap.height?'landscape':'portrait';
+    setOrient(orient);
+    bitmap.close&&bitmap.close();
+  }catch(e){
+    // フォールバック：Imageタグで判断
+    await new Promise(resolve=>{
+      const img=new Image();
+      img.onload=()=>{orient=img.width>=img.height?'landscape':'portrait';setOrient(orient);resolve();};
+      img.onerror=resolve;
+      img.src=dataUrl;
+    });
   }
 }
 
@@ -1327,7 +1355,7 @@ function showS1Converting(show){
         <div style="width:2px;background:var(--green-mid);border-radius:1px;animation:bar .9s .4s ease-in-out infinite alternate;height:20px;"></div>
       </div>
       <div style="font-size:14px;color:var(--ink-mid);letter-spacing:0.08em;text-align:center;line-height:1.9;">
-        仮の下絵づくりをしています。<br>
+        油絵風プレビューを生成しています。<br>
         <span style="font-size:12px;color:var(--ink-hint);">30秒〜1分ほどかかります。<br>このままお待ちください。</span>
       </div>
       <div style="font-size:11.5px;color:var(--ink-hint);text-align:center;max-width:280px;line-height:1.85;padding:12px 16px;background:var(--gold-pale);border-radius:2px;border:0.5px solid var(--gold-border);">
@@ -1341,6 +1369,11 @@ function showS1Converting(show){
 }
 
 // プレビュー拡大モーダル
+function openPreviewByIdx(idx, n){
+  const p=uploadedPhotos[idx];
+  if(!p)return;
+  openPreviewModal(p.preview||p.data, 'プレビュー '+(n||'')+'　— タップで閉じる');
+}
 function openPreviewModal(src, label){
   document.getElementById('previewModalImg').src=src;
   document.getElementById('previewModalLabel').textContent=label||'';
@@ -1363,18 +1396,35 @@ function buildPreviewsGrid(initSelection=false){
   }
   filled.forEach((x,n)=>{
     const isSel=x.i===selectedPreviewIdx;
-    const imgSrc=x.p.preview||x.p.data;
-    const label=`プレビュー ${n+1}`;
     grid.insertAdjacentHTML('beforeend',
-      `<div class="prev-card ${isSel?'sel':''}" data-idx="${x.i}" onclick="selectPreview(${x.i})">
+      `<div class="prev-card ${isSel?'sel':''}" data-idx="${x.i}">
         <div class="prev-card-badge">選択中 ✓</div>
-        <div class="prev-img" onclick="event.stopPropagation();openPreviewModal('${imgSrc}','${label} — タップで閉じる')">
-          <img src="${imgSrc}" alt="${label}">
-          <div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.45);color:#fff;font-size:9px;padding:2px 5px;border-radius:2px;letter-spacing:0.06em;">拡大</div>
+        <div class="prev-img" data-preview-idx="${x.i}">
+          <img src="${x.p.preview||x.p.data}" alt="プレビュー ${n+1}">
+          <div class="prev-zoom-hint">拡大</div>
         </div>
-        <div class="prev-num">${label}</div>
+        <div class="prev-num">プレビュー ${n+1}</div>
         <div class="prev-btn">${isSel?'選択中':'この一枚を選ぶ'}</div>
       </div>`);
+  });
+  grid.querySelectorAll('.prev-card').forEach(card=>{
+    card.addEventListener('click', function(e){
+      const zoomEl=e.target.closest('.prev-img[data-preview-idx]');
+      if(zoomEl){
+        e.stopPropagation();
+        const idx=parseInt(zoomEl.dataset.previewIdx,10);
+        const p=uploadedPhotos[idx];
+        if(p){
+          document.getElementById('previewModalImg').src=p.preview||p.data;
+          document.getElementById('previewModalLabel').textContent='プレビュー — タップで閉じる';
+          document.getElementById('previewModal').classList.add('open');
+          document.body.style.overflow='hidden';
+        }
+        return;
+      }
+      const idx=parseInt(e.currentTarget.dataset.idx,10);
+      selectPreview(idx);
+    });
   });
   syncPhotoBlobUrl();
 }
@@ -1396,9 +1446,16 @@ function syncPhotoBlobUrl(){
 async function autoDetectOrient(){
   const p=uploadedPhotos[selectedPreviewIdx];
   if(!p)return;
-  // processPhotoで判定済みの向きがあれば優先。なければEXIF補正後の実寸法で判定。
-  orient = p.orient || await detectOrientFromDataUrl(p.data);
-  setOrient(orient);
+  await new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      orient=img.width>=img.height?'landscape':'portrait';
+      setOrient(orient);
+      resolve();
+    };
+    img.onerror=resolve;
+    img.src=p.data;
+  });
 }
 
 // S2T: タイトル入力（静かな一言）
@@ -1571,25 +1628,26 @@ async function runGen(){
 
 各候補は次のJSONスキーマに厳密に従ってください：
 - type: "シンプル" | "詩的" | "感謝"
-- title: タイトル（4〜16字程度。**文節として意味が完結した名詞句であること**。語尾が「〜てい」「〜の」など中途半端に終わらないこと。例：「三春のこと」「祖父の手」「夏の光」「あの日の海」）
-- author_suggestion: 作家名の提案（写真の主役の名前があれば、それを優先。例：ペットなら「三春」「ハナ」、人物なら名前。提案できなければお客様のお名前「${userName}」、それも違和感があれば空文字）
-- place_suggestion: 場所の提案（**Q1・Q2・5つの問いから少しでも推測できる場合は積極的に提案**。例：「東京」「祖父母の家、福岡」など。完全に推測不可能な場合のみ空文字。3案で表現を変えてもよい）
-- date_suggestion: 日付の提案（**Q1・Q2・5つの問いから少しでも推測できる場合は積極的に提案**。例：「2024年夏」「2014年9月〜2024年7月」など。完全に推測不可能な場合のみ空文字。3案で表現を変えてもよい）
-- body: 本文（150〜280字程度の物語的な文章。**重要：必ず2〜4行ごとに改行（\\n）を入れ、段落間は空行（\\n\\n）で区切る。各行は短めに整え、20行以内に収める。視覚的に呼吸のある美しい配置にする**）
-- description: 作品説明（30〜70字程度の補足。サブタイトル的なフレーズや、本文の余韻を残す短い言葉。空欄でもよい場合は空文字）
+- title: タイトル（4〜16字。文節として意味が完結した名詞句。語尾が「〜てい」「〜の」など中途半端に終わらないこと。例：「三春のこと」「祖父の手」「夏の光」「あの日の海」）
+- author_suggestion: 作家名（写真の主役の名前を優先。提案できなければ「${userName}」、それも違和感があれば空文字）
+- place_suggestion: 場所（Q1・Q2・5問から少しでも推測できれば積極的に提案。完全に不可能な場合のみ空文字）
+- date_suggestion: 日付（Q1・Q2・5問から少しでも推測できれば積極的に提案。完全に不可能な場合のみ空文字）
+- body: 本文（150〜280字。2〜4行ごとに改行\\n、段落間は空行\\n\\nで区切る。20行以内）
+- description: 作品説明（30〜70字の補足。空欄でもよい場合は空文字）
 
-3つの候補のキャラクター：
-- シンプル：感情を静かに凝縮した、力強く飾らない言葉。本文は事実と感情の核だけを残す。
-- 詩的：情景・光・時間を感じる余白ある表現。本文は比喩や情景描写を含む。
-- 感謝：${isGift?'贈る相手への静かな呼びかけ':'大切な存在への感謝として読める言葉'}。本文は語りかけの形を含む。
+3つの候補：
+- シンプル：感情を静かに凝縮した、力強く飾らない言葉。
+- 詩的：情景・光・時間を感じる余白ある表現。比喩や情景描写を含む。
+- 感謝：${isGift?'贈る相手への静かな呼びかけ':'大切な存在への感謝として読める言葉'}。語りかけの形を含む。
 
 {"interpretation":"（${userName}さんへ。書き出し「${userName}さん、大切な想いを聞かせてくださり、ありがとうございます。」から始まる5段落・900〜1100字のメッセージ。段落間は空行（\\n\\n）。enisuruの人格で、お客様の想いを深く解釈した内容。）","candidates":[{"type":"シンプル","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""},{"type":"詩的","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""},{"type":"感謝","title":"","author_suggestion":"","place_suggestion":"","date_suggestion":"","body":"","description":""}]}`;
 
   try{
     let result;
-    const endpoint=GAS_WEBAPP_URL||GAS_ENDPOINT;
-    if(endpoint&&!endpoint.includes('ここを書き換え')){
-      // GAS経由でAnthropic APIを呼び出す（APIキーはGASのScript Propertiesから読む）
+    const endpoint=GAS_ENDPOINT||GAS_WEBAPP_URL;
+
+    if(endpoint && !endpoint.includes('ここを書き換え')){
+      // GAS経由でClaude APIを呼び出す（APIキーはGASのスクリプトプロパティに保管）
       const res=await fetch(endpoint,{
         method:'POST',
         headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -1601,7 +1659,8 @@ async function runGen(){
       if(!j.success)throw new Error(j.error||'キャプション生成に失敗しました');
       result=j.result;
     } else {
-      await new Promise(r=>setTimeout(r,3500));
+      // GAS未設定時はサンプルデータを使用
+      await new Promise(r=>setTimeout(r,2000));
       result=makeSample(userName,q1,q2,isGift,giftTo,dq('dq1'),dq('dq3'),dq('dq4'));
     }
     clearInterval(iv);
@@ -1620,11 +1679,11 @@ async function runGen(){
     document.getElementById('editSection').style.display='none';
     const btnReset=document.getElementById('goFinalBtn');
     if(btnReset){btnReset.disabled=true;btnReset.textContent='キャプションを選んでください';}
-    go(4,3); // S4: interpretation screen first
+    go(4,3);
   }catch(e){
     clearInterval(iv);go(2,2);
     const err=document.getElementById('qErr');
-    err.textContent='もう一度お試しください。（'+( e.message||'エラー')+'）';
+    err.textContent='もう一度お試しください。（'+(e.message||'エラー')+'）';
     err.style.display='block';
   }
 }
@@ -1634,11 +1693,11 @@ function makeSample(userName,q1,q2,isGift,giftTo,dq1,dq3,dq4){
   const bodyA=`${s}と過ごしたあの時間が、ここにある。\n\n声も匂いも、あの日の光も、\n時間が経つほどに記憶の中で深くなっていく。\n\nこの一枚を選んだのは、\nたぶん理由ではなく、\n心が知っていたから。`;
   const bodyB=`あの日の光は、\nどんな色をしていただろう。\n\n${s}がそこにいたとき、\n空気はどんな温度だったろう。\n\n写真の中の時間は流れない。\nだからこそ、ここにはいつでも帰ってこられる。\n\n絵になっても、\nその温度だけは残っている。`;
   const bodyC=`${isGift?recv+'へ。\n\n':''}伝えきれなかった「ありがとう」が、\nまだたくさんある気がしている。\n\nこの絵を見るたびに、\nその言葉の続きを思い出してほしい。\n\nあなたがそこにいてくれたこと、\n一緒にいられたこと——\nそれだけで、十分すぎるほどだった。`;
-  // タイトルは自然なカットで、最大12文字
-  const titleA = s.length <= 12 ? s : s.slice(0, 10);
-  // 「への」で終わらないクリーンなタイトル
+  // タイトルは語の途中で切らない — 8字以内に収め「のこと」で補完
+  const sClean=s.replace(/[のをにはがでもと、。！？…]+$/,'');
+  const titleA = sClean.length <= 8 ? sClean : (sClean.slice(0,6)+'のこと');
   const recvClean = recv.replace(/[へのをにはが。、]+$/, '');
-  const titleC = isGift ? recvClean.slice(0, 8) + 'へ' : 'ありがとう';
+  const titleC = isGift ? (recvClean.length<=8?recvClean:recvClean.slice(0,6))+'へ' : 'ありがとう';
   return{
     interpretation:`${userName}さん、大切な想いを聞かせてくださり、ありがとうございます。\n\n${s}が写っているこの一枚を、enisuruはゆっくりと受け取りました。写真の中に静かに存在している光、その場所の温度、シャッターを切った瞬間にあなたが感じていたこと——言葉にしなくても、それはちゃんとここにあると感じます。\n\n「${s}」という言葉を読んだとき、enisuruはその存在があなたにとって単純な懐かしさだけでは語り尽くせないものだと感じました。${dq1?'「'+dq1.slice(0,30)+'」という言葉の中に、':'その関係の深さの中に、'}長い時間をかけて積み上げられた信頼や愛情が、静かに宿っているように思えます。\n\n「${r}」——この言葉を、enisuruはとても丁寧に受け取りました。写真を選ぶとき、人は理由を探すのではなく、理由に気づくのだと思っています。${dq3?'「'+dq3.slice(0,20)+'」という感覚は、':'その胸の奥に残るものは、'}つながりの深さの証のように感じます。\n\n${isGift?recv+'への贈り物として届けることを選んでくださったこと——それ自体が、言葉よりも深い形だとenisuruは思います。':'この写真を絵という形で残すことを選んでくださった。それは、あの時間をただの過去にしないという、静かな意志だとenisuruは受け取っています。'}\n\nenisuruは、今日あなたが話してくださった言葉を一つも忘れずに、この作品を仕上げます。届いたとき、「これだ」とそっと感じていただけるよう、丁寧に。`,
     candidates:[
@@ -1836,14 +1895,14 @@ async function submitOrder(){
   const interpretation=document.getElementById('interpText')?document.getElementById('interpText').textContent:'';
   const color=COLOR_PALETTE[selColorIdx];
 
-  // ① submitOrder: テキスト情報のみ送信（画像はsavePhotosで別送）
+  // ① テキストデータのみ先に送信（画像は含めない → GASのペイロード制限回避）
   const textPayload={
     action:'submitOrder',
     userName,email,phone,zip,address,message,
     q1:dq('q1'),q2:dq('q2'),
     isGift:!!isGift,giftTo,
     usecase,
-    usecaseLabel: usecase==='gift'?'大切な人への贈り物として':'自分のために',
+    snsConsent,
     mode: selectedMode===1?'静かな一言の作品':selectedMode===2?'言葉のない作品':'物語が宿る作品',
     sku:selectedSku,
     dq1:dq('dq1'),dq2:dq('dq2'),dq3:dq('dq3'),dq4:dq('dq4'),dq5:dq('dq5'),
@@ -1880,18 +1939,18 @@ async function submitOrder(){
       if(blk)blk.style.display='block';
     }
 
-    // ② savePhotos: 元画像とプレビューをバックグラウンドで送信
+    // ② テキスト送信成功後、画像をバックグラウンドで非同期送信（失敗しても注文は確定済み）
     const selectedPhoto=uploadedPhotos[selectedPreviewIdx];
-    // 元画像（変換前）。EXIF回転を補正して正しい向きで保存する。
-    // 制作用に解像度は大きめ（長辺2400px・高品質0.92）。
+    // Bug①修正: photoBase64はselectedPhoto.data（変換前の元画像）を使う
+    //           photoBlobUrlはpreviewを指している場合があるため使用しない
+    // 元画像（変換前）。EXIF回転を補正して正しい向きで保存（制作用に長辺2400px・高品質）。
     let photoBase64='';
     if(selectedPhoto&&selectedPhoto.data){
       try{
         const orig=await compressImage(selectedPhoto.data,2400,0.92);
         photoBase64=orig.replace(/^data:image\/[a-z]+;base64,/,'');
-      }catch(e){
-        photoBase64=(selectedPhoto.data.indexOf('data:')===0)
-          ?selectedPhoto.data.replace(/^data:image\/[a-z]+;base64,/,''):'';
+      }catch(_){
+        photoBase64=selectedPhoto.data.replace(/^data:image\/[a-z]+;base64,/,'');
       }
     }
     const previewBase64=selectedPhoto?.preview
@@ -1899,7 +1958,12 @@ async function submitOrder(){
       :'';
 
     if(orderId&&(photoBase64||previewBase64)){
-      const photoPayload={action:'savePhotos',orderId,photoBase64,previewBase64};
+      const photoPayload={
+        action:'savePhotos',
+        orderId,
+        photoBase64,
+        previewBase64,
+      };
       // fire-and-forget（画像アップロード失敗しても画面遷移は止めない）
       fetch(endpoint,{
         method:'POST',
@@ -1917,7 +1981,6 @@ async function submitOrder(){
       const sbtn=document.getElementById('shopifyBtn');
       if(sbtn)sbtn.style.display='block';
       go(7,4);
-      // 3秒後にShopifyへ遷移
       setTimeout(()=>{ window.location.href=result.shopifyUrl; }, 3000);
     } else {
       go(7,4);
@@ -1935,7 +1998,9 @@ function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function resetAll(){
   isGift=null;orient=null;selCand=null;photoBlobUrl='';selColorIdx=2;
   // v15 reset
-  usecase='gift';uploadedPhotos=[null,null,null];selectedPreviewIdx=null;selectedSku='classic-sm';
+  usecase='gift';snsConsent='';uploadedPhotos=[null,null,null];selectedPreviewIdx=null;selectedSku='classic-f4';
+  if(document.getElementById('snsYes'))document.getElementById('snsYes').className='op';
+  if(document.getElementById('snsNo'))document.getElementById('snsNo').className='op';
   ['q1','q2','dq1','dq2','dq3','dq4','dq5','userName','photoUrl','giftTo','editTitle','editAuthor','editPlace','editDate','editBody','editDescr','custEmail','custPhone','custZip','custAddress','custMessage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const pa=document.getElementById('photoArea');if(pa)pa.innerHTML='<span class="photo-drop-label">写真を選ぶ</span><span class="photo-drop-sub">jpg・png・heic など</span>';
   document.getElementById('giftDetail').style.display='none';
