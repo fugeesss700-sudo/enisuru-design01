@@ -6,7 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>enisuru — 想いを形に</title>
+<title>enisuru — 想いを形に（v20）</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#F5F2EB;--cream-dark:#EDE9DF;--ink:#1C1B18;--ink-mid:#3D3C38;--ink-light:#6B6A65;--ink-hint:#A8A69F;--gold:#B8963E;--gold-pale:#F7F0DC;--gold-border:#E2D09A;--green-deep:#1A4A3A;--green-mid:#2D6B56;--green-light:#C8DED6;--green-pale:#ECF4F0;--border:rgba(28,27,24,0.10);--border-mid:rgba(28,27,24,0.18);}
@@ -541,9 +541,9 @@ textarea{min-height:78px;}
     <div class="card-body">うまく言えなくても大丈夫です。短い言葉でも、enisuruが丁寧に受け取ります。</div>
     <div class="field"><label class="fl">Q1 — 写っているのは、誰／何ですか？</label><div class="field-example">人でも、動物でも、モノでも、風景でも。例：亡くなった愛犬のハナ／祖父が残した万年筆／窓辺のサボテン／海辺の灯台</div><input type="text" id="q1" placeholder="例：祖父が残した万年筆"></div>
     <div class="field"><label class="fl">Q2 — この一枚を選んだのはなぜですか？</label><div class="field-example">「なんとなく目に止まった」でも大丈夫です。</div><textarea id="q2" placeholder="例：今もデスクの隅に置いてあって、ふと見るたびに祖父の手の動きを思い出すから。"></textarea></div>
-    <div class="field" style="margin-bottom:0;">
-      <label class="fl">Q3 — 誰かへの贈り物ですか？</label>
-      <div class="toggle-row" style="margin-top:8px;">
+    <div class="field" id="q3Field" style="margin-bottom:0;">
+      <label class="fl" id="q3Label">Q3 — どなたへの贈り物ですか？</label>
+      <div class="toggle-row" id="q3Toggle" style="margin-top:8px;">
         <button class="tb" id="gYes" onclick="setGift(true)">誰かに贈りたい</button>
         <button class="tb" id="gNo" onclick="setGift(false)">自分のために残したい</button>
       </div>
@@ -958,15 +958,16 @@ textarea{min-height:78px;}
 
 <script>
 // ============================================================
-// Anthropic APIキーはGAS側のScript Propertiesで管理しています
-// （フロントには露出させない設計）
+// ★ APIキーをここに貼り付けてください ★
+// 取得先: console.anthropic.com → API Keys
+const ANTHROPIC_API_KEY = 'sk-ant-api03-ここを書き換えてください';
 // ============================================================
 
 // ============================================================
 // ★ Google Apps Script の Web App URL をここに貼り付けてください ★
 // 取得方法: 付属の setup_guide.md を参照
 // 未設定（'ここを書き換え'のまま）の場合、注文送信は無効化されます
-const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxWJoX8hO444WUDfR0avkzbuCKv4xL0rzs9RD44o4k9GYi0sIsXq6_d6Kr5p_bqvQ/exec';
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/ここを書き換えてください/exec';
 // ============================================================
 
 // enisuru ロゴ（base64 PNG・透過背景）
@@ -1029,7 +1030,7 @@ const PRODUCT_PHOTOS = {
 // ============================================================
 // ★ GAS デプロイ後にここに URL を貼ってください ★
 // 例: 'https://script.google.com/macros/s/AKfy.../exec'
-const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwLfDbPSg8hwUNkQ5rp_9Totnp-dMcOY9Qamg_YM7DSJKCG-9dPSP7yZ2YiVLbeF6MO/exec';
+const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxWJoX8hO444WUDfR0avkzbuCKv4xL0rzs9RD44o4k9GYi0sIsXq6_d6Kr5p_bqvQ/exec';
 // ============================================================
 
 const HINTS = {
@@ -1044,9 +1045,9 @@ const HINTS = {
   gift: {
     title: '写真選びのヒント — 大切な人への贈り物として',
     items: [
-      'お相手の表情や仕草が見える一枚を',
-      '後ろに何が写っていても、選び方には影響しません',
-      'ふたりで写っている写真、その方の単独の写真、どちらも素敵な作品になります'
+      '主役（人・ペット・風景・モノ）が大きく写っている一枚を',
+      'どんな場面かが伝わる、シーンのわかる写真がおすすめです',
+      '後ろに何が写っていても、選び方には影響しません'
     ]
   }
 };
@@ -1087,6 +1088,7 @@ function go(n,step){
   else id='s'+n;
   const el=document.getElementById(id);
   if(el)el.classList.add('on');
+  if(id==='s2')syncQ3FromUsecase();
   for(let i=1;i<=4;i++){
     document.getElementById('d'+i).className='sd '+(i<step?'done':i===step?'active':'todo');
     if(i<4)document.getElementById('l'+i).className='sl'+(i<step?' done':'');
@@ -1224,11 +1226,19 @@ async function processPhoto(idx){
 
 // 画像を指定サイズ・品質に圧縮してJPEGのdataURLを返す
 // createImageBitmap({imageOrientation:'from-image'}) でiPhoneの縦型写真のEXIF回転を補正
+// dataURL を fetch を介さずに Blob 化（webview/CSP で fetch(data:) が失敗する環境対策）
+function dataURLtoBlob(dataUrl){
+  const parts=dataUrl.split(',');
+  const mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+  const bstr=atob(parts[1]||'');
+  let n=bstr.length; const u8=new Uint8Array(n);
+  while(n--){u8[n]=bstr.charCodeAt(n);}
+  return new Blob([u8],{type:mime});
+}
 async function compressImage(dataUrl, maxSize, quality){
   try{
     // fetch() は data: URL にも対応している
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
+    const blob = dataURLtoBlob(dataUrl);
     // imageOrientation:'from-image' でEXIF Orientationを反映した正しい向きのBitmapを取得
     const bitmap = await createImageBitmap(blob, {imageOrientation:'from-image'});
     const c = document.createElement('canvas');
@@ -1321,8 +1331,7 @@ async function goToPreview(){
 // 写真の実際の向きをEXIF補正後の寸法から自動検出
 async function autoDetectOrientFromPhoto(dataUrl){
   try{
-    const res=await fetch(dataUrl);
-    const blob=await res.blob();
+    const blob=dataURLtoBlob(dataUrl);
     const bitmap=await createImageBitmap(blob,{imageOrientation:'from-image'});
     // EXIF補正後の幅・高さで縦横を判断
     orient=bitmap.width>=bitmap.height?'landscape':'portrait';
@@ -1579,6 +1588,25 @@ function onFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
 function setOrient(v){orient=v;document.getElementById('opLand').className='op'+(v==='landscape'?' sel':'');document.getElementById('opPort').className='op'+(v==='portrait'?' sel':'');}
 function goToQ(){if(!orient){alert('写真の向きを選んでください。');return;}setGift(isGift);go(2,2);}
 function setGift(v){isGift=v;document.getElementById('gYes').className='tb'+(v?' sel':'');document.getElementById('gNo').className='tb'+(!v?' sel':'');document.getElementById('giftDetail').style.display=v?'block':'none';}
+// 最初の画面の「どなたのための作品か」(usecase) に応じてQ3を出し分ける
+function syncQ3FromUsecase(){
+  const field=document.getElementById('q3Field');
+  const label=document.getElementById('q3Label');
+  const toggle=document.getElementById('q3Toggle');
+  const detail=document.getElementById('giftDetail');
+  if(!field)return;
+  if(usecase==='gift'){
+    field.style.display='';
+    isGift=true;
+    if(label)label.textContent='Q3 — どなたへの贈り物ですか？';
+    if(toggle)toggle.style.display='none';
+    if(detail)detail.style.display='block';
+  }else{
+    field.style.display='none';
+    isGift=false;
+    if(detail)detail.style.display='none';
+  }
+}
 function toggleDeep(){
   const d=document.getElementById('deepQs'),i=document.getElementById('dtIcon'),t=document.getElementById('dtActionText');
   const tg=document.querySelector('.deep-toggle');
