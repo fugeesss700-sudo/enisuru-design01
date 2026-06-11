@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- enisuru standalone v21.1 (一般向け / design01) — hybrid
+<!-- enisuru standalone v21.2 (一般向け / design01) — hybrid
      帯1=儀式(縦スクロール: 選ぶ→作品になる(ピン留めreveal,生成完了ゲート)→言葉にする→完成イメージ)
      帯2=商取引(離散ステップ+追従CTA: サイズと装丁→お届け先→完了)
      base: v20 の GAS連携 / EXIF補正 / 25色+主役色抽出 / 印象画fallback / 注文送信・Shopify を保持
@@ -24,7 +24,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
   body{background:var(--cream);color:var(--ink);font-family:"Noto Sans JP",sans-serif;font-weight:300;line-height:1.85;-webkit-font-smoothing:antialiased;}
-  .col{max-width:480px;margin:0 auto;padding:0 20px;}
+  .col{max-width:600px;margin:0 auto;padding:0 20px;}
   .serif{font-family:"Cormorant Garamond",serif;}
   .mincho{font-family:"Shippori Mincho",serif;}
   input[type=file]{display:none;}
@@ -101,7 +101,7 @@
   .reveal-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px 20px;}
   .reveal-eyebrow{font-family:"Shippori Mincho",serif;font-weight:600;font-size:13px;color:var(--gold);letter-spacing:.08em;}
   .reveal-lead{font-family:"Shippori Mincho",serif;font-weight:600;font-size:21px;color:var(--green);letter-spacing:.04em;text-align:center;line-height:1.55;}
-  .reveal-stage{width:min(80vw,320px);aspect-ratio:4/3;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 26px 70px -34px rgba(28,26,22,.55);background:var(--wire-bg);}
+  .reveal-stage{width:min(86vw,360px);aspect-ratio:4/3;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 26px 70px -34px rgba(28,26,22,.55);background:var(--wire-bg);margin:20px auto 4px;}
   .rl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;will-change:opacity;}
   .rl img{width:100%;height:100%;object-fit:cover;}
   .rl .ph-photo{width:100%;height:100%;background:linear-gradient(135deg,#cfc9bb,#b3ab98);}
@@ -324,6 +324,16 @@
     .reveal-outer{height:auto;}
     .reveal-sticky{position:relative;height:auto;min-height:auto;padding:40px 20px;}
   }
+  @media(min-width:768px){
+    .col{max-width:680px;}
+    body{font-size:15px;}
+    .lead{font-size:27px;}
+    .reveal-stage{width:min(60vw,460px);}
+    .artmini{max-width:360px;}
+    .interp-card{padding:46px 42px;}
+    .fc-caption-area{padding:52px 46px 38px;}
+  }
+  @media(min-width:1100px){ .col{max-width:720px;} }
 </style>
 </head>
 <body>
@@ -384,22 +394,22 @@
       <input type="text" id="userName" placeholder="例：田中 一郎" maxlength="30">
     </div>
 
-    <div class="scroll-cue" id="scrollCue">そのまま下へ ── 作品になる瞬間へ ↓</div>
+    <div class="scroll-cue" id="scrollCue">そのまま下へ ── 下絵をつくる ↓</div>
   </div></section>
 
   <!-- 作品になる（ピン留めreveal） -->
-  <section class="reveal-outer" id="s-reveal">
-    <div class="reveal-sticky">
-      <div class="reveal-eyebrow"><span class="en">02</span>下絵をつくる</div>
-      <div class="reveal-lead">下絵を作成中です。</div>
-      <div class="reveal-stage" id="stage">
-        <div class="rl rl-photo" id="rlPhoto"><div class="ph-photo"></div></div>
-        <div class="rl rl-veil" id="rlVeil" style="opacity:0"><img class="brush-logo veil-logo" id="veilLogo" alt=""><div class="vt" id="veilText">下絵を作成中です…</div></div>
-        <div class="rl rl-art" id="rlArt" style="opacity:0"><div class="ph-art"></div><div class="frame"></div></div>
-      </div>
-      <div class="reveal-note">これはAIによる自動下絵です。実際の作品は、この下絵をもとに職人が一点ずつ丁寧に手仕上げいたします。</div>
+  <section id="s-reveal"><div class="col">
+    <div class="eyebrow"><span class="en">02</span>下絵をつくる</div>
+    <div class="lead" id="revealLead">選んだ一枚から、下絵をつくります。</div>
+    <div class="sub" id="revealSub">下のボタンを押すと、下絵の作成がはじまります。</div>
+    <div class="reveal-stage" id="stage">
+      <div class="rl rl-photo" id="rlPhoto"><div class="ph-photo"></div></div>
+      <div class="rl rl-veil" id="rlVeil" style="opacity:0"><img class="brush-logo veil-logo" id="veilLogo" alt=""><div class="vt" id="veilText">下絵を作成中です…</div></div>
+      <div class="rl rl-art" id="rlArt" style="opacity:0"><div class="ph-art"></div><div class="frame"></div></div>
     </div>
-  </section>
+    <div class="reveal-note">これはAIによる自動下絵です。実際の作品は、この下絵をもとに職人が一点ずつ丁寧に手仕上げいたします。</div>
+    <button class="btn gold" id="drawBtn" onclick="onDraw()" style="margin-top:24px;">先に写真を選ぶ</button>
+  </div></section>
 
   <!-- 言葉にする -->
   <section id="s-words"><div class="col">
@@ -611,7 +621,8 @@ function onFile(inp){
     document.getElementById('scrollCue').classList.add('show');
     document.getElementById('orientSel').classList.add('show');
     document.getElementById('rlPhoto').innerHTML='<img src="'+photoSrc+'">';
-    startGeneration();           // ★ 写真選択と同時に生成開始
+    detectOrient(photoSrc);
+    artSrc=''; setRevealReady();
   };
   r.readAsDataURL(f);
   inp.value='';
@@ -655,12 +666,33 @@ async function startGeneration(){
   clearTimeout(veilTimer);
   paintArt();
   genDone=true;
-  const rl=document.querySelector('.reveal-lead'); if(rl)rl.textContent='下絵ができました。';
+  setRevealLayers('done');
+  document.getElementById('revealLead').textContent='下絵ができました。';
+  document.getElementById('revealSub').textContent='下へスクロールして、言葉を添えましょう。';
   const st=document.getElementById('stage'); if(st){st.style.cursor='zoom-in'; st.onclick=()=>{if(artSrc)openZoom(artSrc);};}
-  // ゲート解除：下絵を滑らかに立ち現れさせる
-  const a=document.getElementById('rlArt'); a.style.transition='opacity 1.1s ease';
-  updateReveal();
-  setTimeout(()=>{a.style.transition='';},1200);
+  const db=document.getElementById('drawBtn'); if(db){db.style.display='block'; db.textContent='下絵をつくり直す'; db.classList.remove('gold'); db.classList.add('ghost');}
+}
+
+// reveal：写真選択後＝ready / ボタンで生成
+function setRevealReady(){
+  genStarted=false; genDone=false;
+  document.getElementById('revealLead').textContent='選んだ一枚から、下絵をつくります。';
+  document.getElementById('revealSub').textContent='下のボタンを押すと、下絵の作成がはじまります。';
+  const db=document.getElementById('drawBtn'); db.style.display='block'; db.textContent='下絵をつくる'; db.classList.remove('ghost'); db.classList.add('gold');
+  const st=document.getElementById('stage'); st.style.cursor=''; st.onclick=null;
+  const vt=document.getElementById('veilText'); if(vt)vt.textContent='下絵を作成中です…';
+  setRevealLayers('ready');
+}
+function onDraw(){
+  if(!photoSrc){ document.getElementById('s-choose').scrollIntoView({behavior:'smooth',block:'start'}); return; }
+  if(genStarted && !genDone) return;           // 生成中は無視
+  genStarted=false; genDone=false; artSrc='';  // つくり直し対応
+  document.getElementById('revealLead').textContent='下絵を作成中です。';
+  document.getElementById('revealSub').textContent='筆をいれています。少しお待ちください。';
+  const vt=document.getElementById('veilText'); if(vt)vt.textContent='下絵を作成中です…';
+  document.getElementById('drawBtn').style.display='none';
+  setRevealLayers('generating');
+  startGeneration();
 }
 function paintArt(){
   const a=document.getElementById('rlArt');
@@ -720,31 +752,16 @@ function applyImpressionist(src,cb){
   img.onerror=()=>cb(src);img.src=src;
 }
 
-// ===================== reveal：scroll進行 × 生成完了の遅い方に同期 =====================
-const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-const outer=document.getElementById('s-reveal');
+// ===================== reveal：レイヤ制御（ボタン駆動・scroll非依存） =====================
 const rlPhoto=document.getElementById('rlPhoto'),rlVeil=document.getElementById('rlVeil'),rlArt=document.getElementById('rlArt');
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function lerp(p,a,b){return clamp((p-a)/(b-a),0,1);}
-function updateReveal(){
-  if(reduce){ rlPhoto.style.opacity=genDone?0:1; rlVeil.style.opacity=0; rlArt.style.opacity=genDone?1:0; return; }
-  const rect=outer.getBoundingClientRect();
-  const total=Math.max(1,outer.offsetHeight-window.innerHeight);
-  const p=clamp(-rect.top/total,0,1);
-  const photoOp=1-lerp(p,0.12,0.32);
-  rlPhoto.style.opacity=photoOp;
-  if(genDone){
-    rlVeil.style.opacity=Math.max(0,Math.min(lerp(p,0.16,0.30),1-lerp(p,0.50,0.66)));
-    rlArt.style.opacity=lerp(p,0.52,0.84);
-  }else{
-    // 生成待ち：ヴェールを保ち、作品は出さない（Apple＝待ち時間を演出に）
-    rlVeil.style.opacity=lerp(p,0.12,0.30);
-    rlArt.style.opacity=0;
-  }
+function setRevealLayers(st){
+  [rlPhoto,rlVeil,rlArt].forEach(el=>{el.style.transition='opacity .9s ease';});
+  if(st==='nophoto'||st==='ready'){rlPhoto.style.opacity=1;rlVeil.style.opacity=0;rlArt.style.opacity=0;}
+  else if(st==='generating'){rlPhoto.style.opacity=.12;rlVeil.style.opacity=1;rlArt.style.opacity=0;}
+  else if(st==='done'){rlPhoto.style.opacity=0;rlVeil.style.opacity=0;rlArt.style.opacity=1;}
 }
 let ticking=false;
-window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(()=>{updateReveal();updateBeatNav();ticking=false;});ticking=true;}},{passive:true});
-window.addEventListener('resize',updateReveal);
+window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(()=>{updateBeatNav();ticking=false;});ticking=true;}},{passive:true});
 
 // topbar：現在の幕
 const navSecs=[['choose','s-choose'],['reveal','s-reveal'],['words','s-words']];
@@ -793,7 +810,7 @@ async function runCaption(){
 
   const prompt=`あなたはenisuruというアートサービスのスタッフです。人格：想いの翻訳者・記憶の編集者・やさしい伴走者。決めつけず、急かさず、感動を押し売りしない。文体：丁寧なですます調、温かいが熱すぎない、少し詩的だが意味は明確。
 
-以下の情報と、可能であれば添付の写真も参照し、JSONのみを返してください。コードブロックや前置きは不要です。especially description（写真の説明）は、写真に写る情景を読み取って書いてください。
+以下の情報をもとに、JSONのみを返してください。コードブロックや前置きは不要です。description（写真の説明）は、Q3〜Q6から情景を読み取って書いてください。
 
 お客様のお名前：${name}
 この写真を選んだ理由：${q1}
@@ -807,8 +824,7 @@ async function runCaption(){
   try{
     let result;
     if(GAS_ENDPOINT && !GAS_ENDPOINT.includes('ここを書き換え')){
-      let capImg=''; try{capImg=(await compressImage(photoSrc,700,0.7)).replace(/^data:image\/[a-z]+;base64,/,'');}catch(_){}
-      const res=await fetch(GAS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'generateCaption',prompt,image:capImg,mimeType:'image/jpeg'}),redirect:'follow'});
+      const res=await fetch(GAS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'generateCaption',prompt}),redirect:'follow'});
       if(!res.ok)throw new Error('HTTP '+res.status);
       const j=await res.json();
       if(!j.success)throw new Error(j.error||'生成に失敗しました');
@@ -1033,7 +1049,7 @@ async function submitOrder(){
 }
 function resetAll(){location.reload();}
 
-updateReveal();updateBeatNav();
+setRevealLayers('nophoto');updateBeatNav();
 </script>
 </body>
 </html>
