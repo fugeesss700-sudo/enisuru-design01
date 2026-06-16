@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- enisuru standalone v21.2 (一般向け / design01) — hybrid
+<!-- enisuru standalone v21.3 (一般向け / design01) — hybrid
      帯1=儀式(縦スクロール: 選ぶ→作品になる(ピン留めreveal,生成完了ゲート)→言葉にする→完成イメージ)
      帯2=商取引(離散ステップ+追従CTA: サイズと装丁→お届け先→完了)
      base: v20 の GAS連携 / EXIF補正 / 25色+主役色抽出 / 印象画fallback / 注文送信・Shopify を保持
@@ -19,6 +19,8 @@
     --gold:#B8963E; --gold-soft:#D9C58A; --gold-pale:#F8F1DD; --gold-border:#E2D09A;
     --ink:#1C1A16; --ink-mid:#3D3B35; --ink-soft:#5A554C; --ink-hint:#A29C8E;
     --line:#E2DCCF; --wire:#CFC8B8; --wire-bg:#EFEBE0; --clay:#9C5F4A;
+    --canvas-col:#E9E1D0;
+    --canvas-img:repeating-linear-gradient(0deg, rgba(150,130,95,.07) 0px, rgba(150,130,95,.07) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(90deg, rgba(150,130,95,.07) 0px, rgba(150,130,95,.07) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(0deg, rgba(110,95,70,.04) 0px, rgba(110,95,70,.04) 1px, transparent 1px, transparent 9px), radial-gradient(130% 130% at 50% 30%, rgba(255,252,245,.45), rgba(70,58,38,.06));
     --green-light:#C8DED6; --green-pale:#ECF4F0;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -101,18 +103,18 @@
   .reveal-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px 20px;}
   .reveal-eyebrow{font-family:"Shippori Mincho",serif;font-weight:600;font-size:13px;color:var(--gold);letter-spacing:.08em;}
   .reveal-lead{font-family:"Shippori Mincho",serif;font-weight:600;font-size:21px;color:var(--green);letter-spacing:.04em;text-align:center;line-height:1.55;}
-  .reveal-stage{width:min(86vw,360px);aspect-ratio:4/3;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 26px 70px -34px rgba(28,26,22,.55);background:var(--wire-bg);margin:20px auto 4px;}
+  .reveal-stage{width:min(86vw,360px);aspect-ratio:4/3;border-radius:6px;position:relative;overflow:hidden;box-shadow:0 26px 70px -34px rgba(28,26,22,.55);background-color:var(--canvas-col);background-image:var(--canvas-img);margin:20px auto 4px;}
   .rl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;will-change:opacity;}
   .rl img{width:100%;height:100%;object-fit:cover;}
-  .rl .ph-photo{width:100%;height:100%;background:linear-gradient(135deg,#cfc9bb,#b3ab98);}
-  .rl-veil{background:linear-gradient(135deg,var(--green-soft),var(--green));flex-direction:column;gap:22px;}
+  .rl .ph-photo{width:100%;height:100%;background-color:var(--canvas-col);background-image:var(--canvas-img);}
+  .rl-veil{background-color:var(--canvas-col);background-image:var(--canvas-img);flex-direction:column;gap:22px;}
   .rl-veil .ring{width:36px;height:36px;border:2px solid rgba(217,197,138,.3);border-top-color:var(--gold-soft);border-radius:50%;animation:spin 1s linear infinite;}
-  .rl-veil .vt{font-family:"Shippori Mincho",serif;font-weight:500;font-size:13.5px;color:#fff;letter-spacing:.05em;text-align:center;line-height:1.7;}
+  .rl-veil .vt{font-family:"Shippori Mincho",serif;font-weight:500;font-size:13.5px;color:var(--green);letter-spacing:.05em;text-align:center;line-height:1.7;}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes brushLoop{0%{clip-path:inset(0 100% 0 0);opacity:.10;}52%{clip-path:inset(0 0 0 0);opacity:.72;}80%{clip-path:inset(0 0 0 0);opacity:.72;}92%{opacity:.05;}100%{clip-path:inset(0 100% 0 0);opacity:.05;}}
   .brush-logo{width:120px;max-width:55%;height:auto;animation:brushLoop 4s ease-in-out infinite;}
   .rl img.brush-logo{width:108px;max-width:50%;height:auto;object-fit:contain;}
-  .veil-logo{filter:brightness(0) invert(1);opacity:.8;}
+  .veil-logo{opacity:.5;}
   .cap-logo{width:72px;opacity:.85;}
   /* zoom lightbox */
   #zoom{display:none;position:fixed;inset:0;z-index:120;background:rgba(20,18,14,.92);align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;cursor:zoom-out;}
@@ -120,9 +122,9 @@
   #zoom img{max-width:96vw;max-height:84vh;object-fit:contain;box-shadow:0 30px 80px -30px rgba(0,0,0,.8);border-radius:2px;}
   #zoom .zc{font-size:11.5px;color:rgba(255,255,255,.7);letter-spacing:.08em;}
   @media(prefers-reduced-motion:reduce){.brush-logo{animation:none;clip-path:none;opacity:.6;}}
-  .rl-art .ph-art{width:100%;height:100%;background:linear-gradient(135deg,#7a6a4a,#9c7b4a 40%,#b89a5e 70%,#5a6e58);}
+  .rl-art .ph-art{width:100%;height:100%;background-color:var(--canvas-col);background-image:var(--canvas-img);}
   .rl-art .frame{position:absolute;inset:14px;border:2px solid rgba(255,255,255,.4);pointer-events:none;}
-  .reveal-note{font-size:10.5px;color:var(--ink-hint);text-align:center;max-width:300px;line-height:1.8;padding:11px 14px;background:var(--gold-pale);border:1px solid var(--gold-border);border-radius:2px;}
+  .reveal-note{font-size:10.5px;color:var(--ink-hint);text-align:center;max-width:340px;line-height:1.8;padding:12px 16px;background:var(--gold-pale);border:1px solid var(--gold-border);border-radius:2px;margin:14px auto 0;}
 
   /* styles */
   .after-lead{font-family:"Shippori Mincho",serif;font-weight:600;font-size:22px;color:var(--green);text-align:center;margin-bottom:4px;}
@@ -138,7 +140,7 @@
   .styles-note{text-align:center;font-size:11px;color:var(--ink-hint);margin-top:12px;}
 
   /* words */
-  .artmini{border-radius:8px;overflow:hidden;position:relative;background:linear-gradient(135deg,#7a6a4a,#b89a5e 60%,#5a6e58);margin:24px auto 22px;width:100%;max-width:300px;aspect-ratio:4/3;}
+  .artmini{border-radius:8px;overflow:hidden;position:relative;background-color:var(--canvas-col);background-image:var(--canvas-img);margin:24px auto 22px;width:100%;max-width:300px;aspect-ratio:4/3;}
   .artmini img{width:100%;height:100%;object-fit:cover;}
   .artmini .fr{position:absolute;inset:10px;border:1.5px solid rgba(255,255,255,.4);pointer-events:none;}
   .qs{display:flex;flex-direction:column;gap:18px;}
@@ -407,7 +409,7 @@
       <div class="rl rl-veil" id="rlVeil" style="opacity:0"><img class="brush-logo veil-logo" id="veilLogo" alt=""><div class="vt" id="veilText">下絵を作成中です…</div></div>
       <div class="rl rl-art" id="rlArt" style="opacity:0"><div class="ph-art"></div><div class="frame"></div></div>
     </div>
-    <div class="reveal-note">これはAIによる自動下絵です。実際の作品は、この下絵をもとに職人が一点ずつ丁寧に手仕上げいたします。</div>
+    <div class="reveal-note">これは簡易の下絵画像です。実際の作品は、この預かった写真をもとに職人が一点ずつ丁寧に筆を使い、手仕上げいたします。</div>
     <button class="btn gold" id="drawBtn" onclick="onDraw()" style="margin-top:24px;">先に写真を選ぶ</button>
   </div></section>
 
@@ -435,7 +437,7 @@
     <!-- loading -->
     <div class="cap-loading" id="capLoading">
       <img class="brush-logo cap-logo" id="capLogo" alt="" style="margin:0 auto 22px;display:block;">
-      <div class="lt" id="capLoadMsg">あなたの言葉から、そっと意味を読み取っています。</div>
+      <div class="lt" id="capLoadMsg">あなたの言葉を、そっと受け取っています。</div>
     </div>
 
     <!-- eni message -->
@@ -804,7 +806,7 @@ async function runCaption(){
   const name=val('userName');
   document.getElementById('genBtn').style.display='none';
   document.getElementById('capLoading').classList.add('show');
-  const msgs=['あなたの言葉から、そっと意味を読み取っています。','この写真の持つ時間を、丁寧にたどっています。','言葉にならなかった想いに、輪郭を見つけています。','作品に添える言葉を、整えています。'];
+  const msgs=['あなたの言葉を、そっと受け取っています。','写真の時間に、耳を澄ませています。','想いに、言葉の形を与えています。','作品に添える言葉を、一文字ずつ綴っています。'];
   let mi=0;const lm=document.getElementById('capLoadMsg');
   const iv=setInterval(()=>{lm.textContent=msgs[Math.min(mi++,msgs.length-1)];},2200);
 
