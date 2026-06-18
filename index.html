@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<!-- enisuru standalone v21.4 (一般向け / design01) — hybrid
-     v21.4 変更: (1)表示用に透かし焼き込み(makeWatermarked)。下絵・artmini・完成プレビュー・拡大は透かし版、GAS保存はクリーン版を分離。(2)拡大表示は長辺1000pxに上限。(3)置き去り定数を整理(GAS_WEBAPP_URL/SHOPIFY_DOMAIN/SHOPIFY_VARIANTS/HTML側buildShopifyUrlを削除。決済URLはGAS result.shopifyUrl に一本化)。
+<!-- enisuru standalone v21.6 (一般向け / design01) — hybrid
+     v21.6 変更: (1)透かしの右下に銘キャプション「enisuru ── 下絵（手仕上げ前）」を半透明の下地帯付きで焼き込み(B+B′)。表示専用、GAS保存はクリーンのまま。(2)向き不具合修正: 写真選択時の向き自動検出を await 化＋手動選択をロックし、遅延した自動検出が手動の横/縦選択を上書きしないように。(3)向き変更後も透かし版(artWatermarked)を作り直し、下絵・artmini・完成プレビュー・拡大をすべて新しい向きに同期。
+     v21.5 変更: 表示用透かし画像を選択向き(横=4/3 / 縦=3/4)に中央クロップしてから焼き込み、インライン枠と拡大表示を一致。生成開始時の向き再検出を廃止。
+     v21.4 変更: 表示用に透かし焼き込み(makeWatermarked)。GAS保存はクリーン版を分離。拡大は長辺1000px上限。置き去り定数を整理し決済URLをGAS result.shopifyUrl に一本化。
      帯1=儀式(縦スクロール: 選ぶ→作品になる(ピン留めreveal,生成完了ゲート)→言葉にする→完成イメージ)
      帯2=商取引(離散ステップ+追従CTA: サイズと装丁→お届け先→完了)
      base: v20 の GAS連携 / EXIF補正 / 25色+主役色抽出 / 印象画fallback / 注文送信・Shopify を保持
@@ -369,8 +371,8 @@
       <div class="orient-sel" id="orientSel">
         <div class="orient-lab">作品の向き<span class="nt">自動検出済・変更できます</span></div>
         <div class="orient-opts">
-          <div class="op" id="opLand" onclick="setOrient('landscape')"><div class="op-rect" style="width:54px;height:38px;"></div>横型</div>
-          <div class="op" id="opPort" onclick="setOrient('portrait')"><div class="op-rect" style="width:34px;height:48px;"></div>縦型</div>
+          <div class="op" id="opLand" onclick="setOrient('landscape', true)"><div class="op-rect" style="width:54px;height:38px;"></div>横型</div>
+          <div class="op" id="opPort" onclick="setOrient('portrait', true)"><div class="op-rect" style="width:34px;height:48px;"></div>縦型</div>
         </div>
       </div>
     </div>
@@ -585,7 +587,7 @@ const COLOR_PALETTE=[{hex:'#F5E6D3',name:'練色',no:1},{hex:'#EFE5D7',name:'砂
 // ============================================================
 
 // ----- state -----
-let photoSrc='', artSrc='', orient=null, genStarted=false, genDone=false;
+let photoSrc='', artSrc='', orient=null, userOrientLocked=false, genStarted=false, genDone=false;
 let selColorIdx=2, selectedSku={key:'classic-f4',line:'CLASSIC',size:'F4',price:33800};
 let snsConsent='', interpretation='';
 
@@ -608,7 +610,7 @@ function pickFile(){ document.getElementById('fileInput').click(); }
 function onFile(inp){
   const f=inp.files&&inp.files[0]; if(!f)return;
   const r=new FileReader();
-  r.onload=e=>{
+  r.onload=async e=>{
     photoSrc=e.target.result;
     document.getElementById('thumbImg').src=photoSrc;
     document.getElementById('drop').style.display='none';
@@ -616,8 +618,9 @@ function onFile(inp){
     document.getElementById('scrollCue').classList.add('show');
     document.getElementById('orientSel').classList.add('show');
     document.getElementById('rlPhoto').innerHTML='<img src="'+photoSrc+'">';
-    detectOrient(photoSrc);
-    artSrc=''; setRevealReady();
+    artSrc=''; userOrientLocked=false;
+    await detectOrient(photoSrc);   // 向きを確定させてから操作可能に（手動選択の上書き競合を防止）
+    setRevealReady();
   };
   r.readAsDataURL(f);
   inp.value='';
@@ -641,7 +644,7 @@ async function startGeneration(){
   // 長引いた時のヴェール添え書き
   const veilTimer=setTimeout(()=>{const v=document.getElementById('veilText');if(v&&!genDone)v.textContent='もう少しだけ、お待ちください…';},14000);
   try{
-    await detectOrient(photoSrc);
+    // 向きは写真選択時(onFile→detectOrient)に検出済み。上部で手動変更した選択を尊重するため、ここでは再検出しない。
     let preview;
     if(GAS_ENDPOINT && !GAS_ENDPOINT.includes('ここを書き換え')){
       const compressed=await compressImage(photoSrc,800,0.72);
@@ -659,7 +662,7 @@ async function startGeneration(){
     try{ artSrc=await applyImpressionistAsync(photoSrc); }catch(_){ artSrc=photoSrc; }
   }
   clearTimeout(veilTimer);
-  artWatermarked = await makeWatermarked(artSrc, 1000);
+  artWatermarked = await makeWatermarked(artSrc, 1000, (orient==='portrait'?3/4:4/3));
   paintArt();
   genDone=true;
   setRevealLayers('done');
@@ -706,9 +709,9 @@ async function detectOrient(dataUrl){
   try{
     const res=await fetch(dataUrl); const blob=await res.blob();
     const bm=await createImageBitmap(blob,{imageOrientation:'from-image'});
-    setOrient(bm.width>=bm.height?'landscape':'portrait'); bm.close&&bm.close();
+    await setOrient(bm.width>=bm.height?'landscape':'portrait', false); bm.close&&bm.close();
   }catch(e){
-    await new Promise(rs=>{const i=new Image();i.onload=()=>{setOrient(i.width>=i.height?'landscape':'portrait');rs();};i.onerror=rs;i.src=dataUrl;});
+    await new Promise(rs=>{const i=new Image();i.onload=async()=>{await setOrient(i.width>=i.height?'landscape':'portrait', false);rs();};i.onerror=rs;i.src=dataUrl;});
   }
 }
 // 圧縮＋EXIF補正（v20）
@@ -752,16 +755,25 @@ function applyImpressionist(src,cb){
 // ===================== ウォーターマーク（表示専用・GAS保存はクリーン版） =====================
 // artSrc=透かしなしクリーン版（GASへ送る／色解析に使う）。artWatermarked=画面表示専用の透かし版。
 let artWatermarked='';
-function makeWatermarked(src, maxEdge){
+function makeWatermarked(src, maxEdge, targetAspect){
   return new Promise(resolve=>{
     const img=new Image(); img.crossOrigin='anonymous';
     img.onload=function(){
-      let W=img.naturalWidth, H=img.naturalHeight;
+      const sw=img.naturalWidth, sh=img.naturalHeight;
+      // targetAspect(=幅/高さ)が指定されたら、選択された向きに中央クロップ(cover)。
+      // これにより拡大(object-fit:contain)でもインライン枠と縦横比が一致する。
+      let cropW=sw, cropH=sh, sx=0, sy=0;
+      if(targetAspect){
+        const a=sw/sh;
+        if(a>targetAspect){ cropW=Math.round(sh*targetAspect); sx=Math.round((sw-cropW)/2); }
+        else if(a<targetAspect){ cropH=Math.round(sw/targetAspect); sy=Math.round((sh-cropH)/2); }
+      }
+      let W=cropW, H=cropH;
       const edge=Math.max(W,H);
       if(maxEdge && edge>maxEdge){ const s=maxEdge/edge; W=Math.round(W*s); H=Math.round(H*s); }
       const c=document.createElement('canvas'); c.width=W; c.height=H;
       const ctx=c.getContext('2d');
-      ctx.drawImage(img,0,0,W,H);
+      ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, W, H);
       const unit=Math.max(W,H);
       // 対角タイルの透かしテキスト（トリミングで消えないよう全面に敷く）
       ctx.save();
@@ -780,9 +792,26 @@ function makeWatermarked(src, maxEdge){
         }
       }
       ctx.restore();
-      // 中央ロゴ
+      // 中央ロゴ → 右下キャプション → 出力
       const logo=new Image();
-      const done=()=>resolve(c.toDataURL('image/jpeg',0.9));
+      const done=()=>{
+        // 右下キャプション（銘）: enisuru の下絵であることを明示。半透明の下地帯で明暗どちらの作品でも読めるように。
+        const fs=Math.round(unit*0.034);
+        const text='enisuru ── 下絵（手仕上げ前）';
+        const pad=Math.round(unit*0.035);
+        ctx.save();
+        ctx.font='500 '+fs+'px "Shippori Mincho","Noto Serif CJK JP","Yu Mincho",serif';
+        ctx.textAlign='right'; ctx.textBaseline='alphabetic';
+        const x=W-pad, y=H-pad, tw=ctx.measureText(text).width;
+        const pw=tw+fs*1.1, ph=fs*1.6, rx=x-tw-fs*0.55, ry=y-fs*1.2, r=fs*0.28;
+        ctx.fillStyle='rgba(20,18,14,0.30)';
+        if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(rx,ry,pw,ph,r); ctx.fill(); }
+        else ctx.fillRect(rx,ry,pw,ph);
+        ctx.fillStyle='rgba(255,252,247,0.95)';
+        ctx.fillText(text,x,y);
+        ctx.restore();
+        resolve(c.toDataURL('image/jpeg',0.9));
+      };
       logo.onload=function(){
         const lw=W*0.42, lh=lw*(logo.naturalHeight/logo.naturalWidth);
         ctx.save(); ctx.globalAlpha=0.13;
@@ -817,13 +846,22 @@ function updateBeatNav(){
 }
 
 // ===================== 向き（縦横） =====================
-function setOrient(v){
+async function setOrient(v, manual){
+  // 自動検出(manual=false)は、ユーザーが手動で選んだ後は上書きしない（遅延した自動検出による競合を防止）
+  if(!manual && userOrientLocked) return;
+  if(manual) userOrientLocked=true;
   orient=v;
   const l=document.getElementById('opLand'),p=document.getElementById('opPort');
   if(l)l.classList.toggle('sel',v==='landscape'); if(p)p.classList.toggle('sel',v==='portrait');
   const st=document.getElementById('stage'); if(st)st.style.aspectRatio=(v==='portrait')?'3/4':'4/3';
   const amw=document.querySelector('.artmini'); if(amw)amw.style.aspectRatio=(v==='portrait')?'3/4':'4/3';
   const wrap=document.getElementById('fcPhotoWrap'); if(wrap&&wrap.querySelector('img'))wrap.style.paddingTop=(v==='portrait')?'144%':'69.4%';
+  // 生成済みなら、新しい向きで透かし版を作り直し、下絵・artmini・完成プレビュー・拡大をすべて同期
+  if(artSrc){
+    artWatermarked = await makeWatermarked(artSrc, 1000, (v==='portrait'?3/4:4/3));
+    if(typeof paintArt==='function') paintArt();
+    if(wrap){ const fim=wrap.querySelector('img'); if(fim) fim.src=artWatermarked; }
+  }
   if(typeof renderSkuPreview==='function')renderSkuPreview();
 }
 
