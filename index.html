@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- enisuru standalone v21.6 (一般向け / design01) — hybrid
+<!-- enisuru standalone v21.7 (一般向け / design01) — hybrid
+     v21.7 変更: Beat03 冒頭に「言葉を添えるか」の分岐(capFork)を追加。yes=従来の問い→AI下書き→キャプション、no=問いをすべて省略し絵のみで完成イメージへ。noの場合は完成イメージのキャプション面・背景色選択・編集ヒントを非表示、確認文も差し替え、注文payloadに captionMode/hasCaption を追加しキャプション項目は空で送信。分岐は何度でも切替可能。
      v21.6 変更: (1)透かしの右下に銘キャプション「enisuru ── 下絵（手仕上げ前）」を半透明の下地帯付きで焼き込み(B+B′)。表示専用、GAS保存はクリーンのまま。(2)向き不具合修正: 写真選択時の向き自動検出を await 化＋手動選択をロックし、遅延した自動検出が手動の横/縦選択を上書きしないように。(3)向き変更後も透かし版(artWatermarked)を作り直し、下絵・artmini・完成プレビュー・拡大をすべて新しい向きに同期。
      v21.5 変更: 表示用透かし画像を選択向き(横=4/3 / 縦=3/4)に中央クロップしてから焼き込み、インライン枠と拡大表示を一致。生成開始時の向き再検出を廃止。
      v21.4 変更: 表示用に透かし焼き込み(makeWatermarked)。GAS保存はクリーン版を分離。拡大は長辺1000px上限。置き去り定数を整理し決済URLをGAS result.shopifyUrl に一本化。
@@ -189,6 +190,24 @@
   .cand.sel .cand-type{color:var(--green-soft);}
   .cand-title{font-family:"Shippori Mincho",serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:9px;line-height:1.4;word-break:break-word;}
   .cand-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.85;}
+  /* caption fork（言葉を添えるかの確認） */
+  .capfork{margin-top:26px;}
+  .capfork .cf-t{font-family:"Shippori Mincho",serif;font-size:16px;font-weight:600;color:var(--green);letter-spacing:.03em;margin-bottom:9px;}
+  .capfork .cf-n{font-size:12.5px;color:var(--ink-soft);line-height:1.95;margin-bottom:17px;}
+  .fork-opts{display:flex;flex-direction:column;gap:11px;}
+  .fork-opt{display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:20px;cursor:pointer;transition:.2s;font-family:"Noto Sans JP",sans-serif;}
+  .fork-opt:hover{border-color:var(--green-soft);background:var(--green-pale);}
+  .fork-opt.sel{border:1.5px solid var(--green);background:var(--green-pale);}
+  .fork-opt .fo-t{font-family:"Shippori Mincho",serif;font-size:16px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:7px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .fork-opt .fo-tag{font-family:"Noto Sans JP",sans-serif;font-size:10.5px;font-weight:400;color:var(--gold);background:var(--gold-pale);border:1px solid var(--gold-border);border-radius:2px;padding:1px 7px;letter-spacing:.04em;}
+  .fork-opt .fo-d{font-size:12px;color:var(--ink-soft);line-height:1.85;}
+  .capyes,.capno{display:none;}
+  .capyes.show,.capno.show{display:block;animation:rise .5s ease both;}
+  .nc-card{margin-top:26px;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:22px;}
+  .nc-t{font-family:"Shippori Mincho",serif;font-size:13.5px;font-weight:600;color:var(--green);margin-bottom:10px;}
+  .nc-b{font-size:12.5px;color:var(--ink-soft);line-height:1.95;}
+  .fork-back{margin-top:11px;}
+
   /* caption form */
   .capform{display:none;margin-top:30px;}
   .capform.show{display:block;animation:rise .5s ease both;}
@@ -420,10 +439,28 @@
   <section id="s-words"><div class="col">
     <div class="eyebrow"><span class="en">03</span>言葉にする</div>
     <div class="lead">この一枚に、想いを。</div>
-    <div class="sub">言葉にならなくても大丈夫。enisuruが、いっしょに探します。</div>
+    <div class="sub">添えるかどうかから、お選びいただけます。言葉にならなくても大丈夫。enisuruが、いっしょに探します。</div>
 
     <div class="artmini"><img id="artMiniImg" alt=""><div class="fr"></div></div>
 
+    <!-- 分岐：言葉を添えるか -->
+    <div class="capfork" id="capFork">
+      <div class="cf-t">この作品に、言葉を添えますか。</div>
+      <div class="cf-n">キャプションは、題名や短い言葉を記した紙で、作品といっしょにお届けします。絵だけをそのまま残す方もいらっしゃいます。どちらを選んでも、作品そのものの仕上がりは変わりません。</div>
+      <div class="fork-opts">
+        <button type="button" class="fork-opt" id="forkYes" onclick="chooseCaption('yes')">
+          <div class="fo-t">言葉を添える<span class="fo-tag">おすすめ</span></div>
+          <div class="fo-d">いくつかの問いにお答えいただくと、enisuruが下書きを差し出します。書き換えることも、削ることもできます。</div>
+        </button>
+        <button type="button" class="fork-opt" id="forkNo" onclick="chooseCaption('no')">
+          <div class="fo-t">絵だけを残す</div>
+          <div class="fo-d">題名も言葉も添えず、作品そのものをお届けします。問いへのご回答は不要です。</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- 言葉を添える場合 -->
+    <div class="capyes" id="capYes">
     <div class="qs">
       <div class="q"><label><span class="qn">Q1</span>この写真を選んだ理由を教えてください<span class="req">必須</span></label><textarea id="q1" rows="2" placeholder="例：ふと見るたび、あの頃を思い出すから"></textarea></div>
       <div class="q"><label><span class="qn">Q2</span>誰に届けたいですか<span class="req">必須</span></label><input type="text" id="q2" placeholder="例：自分のために／妻へ／亡き祖父へ"></div>
@@ -466,6 +503,17 @@
       <button class="btn" onclick="buildFinal()">完成イメージを見る</button>
       <div class="micro">叩き台です。最後の一行は、あなたの手で。</div>
     </div>
+    </div><!-- /capYes -->
+
+    <!-- 絵だけを残す場合 -->
+    <div class="capno" id="capNo">
+      <div class="nc-card">
+        <div class="nc-t">キャプションは添えずにお届けします</div>
+        <div class="nc-b">題名も言葉もない、絵そのものだけの一点です。仕上げのご希望は、このあとの画面でうかがいます。お気持ちが変われば、いつでも言葉を添える形に戻せます。</div>
+      </div>
+      <button class="btn" style="margin-top:22px;" onclick="buildFinal()">完成イメージを見る</button>
+      <button class="btn ghost fork-back" onclick="chooseCaption('yes')">やはり言葉を添える</button>
+    </div>
   </div></section>
 
   <!-- 完成イメージ -->
@@ -473,7 +521,7 @@
     <div class="eyebrow">完成イメージ</div>
     <div class="lead" style="margin-bottom:18px;">このような姿で、お届けします。</div>
     <div class="impression-note"><b>※ この写真は、加工前のイメージです。</b><br>実際の作品は、お届けの写真をもとに専門の職人が仕上げを施した、一点物の絵画にしてお届けします。</div>
-    <div class="edit-hint">文章を直したいときは、上の下書きを修正してから、もう一度「完成イメージを見る」を押してください。</div>
+    <div class="edit-hint" id="editHint">文章を直したいときは、上の下書きを修正してから、もう一度「完成イメージを見る」を押してください。</div>
 
     <div class="final-outer">
       <div class="fc-photo-wrap" id="fcPhotoWrap"></div>
@@ -487,13 +535,13 @@
       </div>
     </div>
 
-    <div class="color-wrap">
+    <div class="color-wrap" id="colorWrap">
       <div class="color-head"><div class="color-title">背景色（25色から選べます）</div><div class="color-cur" id="colorCur">— —</div></div>
       <div class="color-note">初期表示は <b>生成色（No.3）</b>です。<br>あなたの作品の中で最も象徴的な色に近い色を選ばれることをおすすめします。</div>
       <div class="color-grid" id="colorGrid"></div>
     </div>
 
-    <div class="confirm-msg">上記の完成イメージをもとに、enisuruチームが <b>実際の作品とキャプション</b>を一点ずつ手作業で制作し、お届けします。</div>
+    <div class="confirm-msg" id="confirmMsg">上記の完成イメージをもとに、enisuruチームが <b>実際の作品とキャプション</b>を一点ずつ手作業で制作し、お届けします。</div>
 
     <div class="finish-wish">
       <div class="fw-title">仕上げのご希望</div>
@@ -873,6 +921,18 @@ function setStyle(el){
 }
 
 // ===================== Beat 03：言葉にする（GAS generateCaption → 1下書き） =====================
+// captionMode: '' 未選択 / 'yes' 言葉を添える / 'no' 絵だけを残す
+let captionMode='';
+function chooseCaption(v){
+  captionMode=v;
+  document.getElementById('forkYes').classList.toggle('sel',v==='yes');
+  document.getElementById('forkNo').classList.toggle('sel',v==='no');
+  document.getElementById('capYes').classList.toggle('show',v==='yes');
+  document.getElementById('capNo').classList.toggle('show',v==='no');
+  document.getElementById('s-final').classList.remove('show'); // 選び直したら完成イメージは作り直し
+  const t=document.getElementById(v==='yes'?'capYes':'capNo');
+  setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
 const QIDS=['q1','q2','q3','q4','q5','q6','q7'];
 function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
 function countBody(){
@@ -994,35 +1054,50 @@ function fitTitle(){
   while(el.scrollHeight>size*1.25*1.6 && size>17 && guard<12){ size-=1.5; el.style.fontSize=size+'px'; guard++; }
 }
 function buildFinal(){
-  const title=val('cTitle');
-  if(!title){alert('タイトルをご入力ください。');return;}
-  const author=val('cAuthor'),place=val('cPlace'),date=val('cDate'),body=val('cBody'),descr=val('cDescr');
-  document.getElementById('fcTitle').textContent=title;
-  const metaEl=document.getElementById('fcMeta');const ml=[];
-  if(author)ml.push('<div class="fc-meta-line">'+esc(author)+'</div>');
-  if(place)ml.push('<div class="fc-meta-line">'+esc(place)+'</div>');
-  if(date)ml.push('<div class="fc-meta-line">'+esc(date)+'</div>');
-  metaEl.innerHTML=ml.join('');
-  document.getElementById('fcBody').textContent=body;
-  document.getElementById('fcBody').style.display=body?'block':'none';
-  document.getElementById('fcRule').style.display=body?'block':'none';
-  const de=document.getElementById('fcDesc');
-  if(descr){de.textContent='— '+descr;de.style.display='block';}else de.style.display='none';
-  // 自動レイアウト判定：本文あり=物語 / 本文なし他あり=メタ / タイトルのみ=一言
-  const onlyTitle=!body&&!author&&!place&&!date&&!descr;
-  document.getElementById('fcCap').classList.toggle('titleonly',onlyTitle);
+  const noCap=(captionMode==='no');
+  const capEl=document.getElementById('fcCap');
+  if(noCap){
+    capEl.style.display='none';
+    document.getElementById('colorWrap').style.display='none';
+    document.getElementById('editHint').style.display='none';
+    document.getElementById('confirmMsg').innerHTML='上記の完成イメージをもとに、enisuruチームが <b>実際の作品</b>を一点ずつ手作業で制作し、お届けします。キャプションは添えずにお届けします。';
+  }else{
+    const title=val('cTitle');
+    if(!title){alert('タイトルをご入力ください。');return;}
+    capEl.style.display='';
+    document.getElementById('colorWrap').style.display='';
+    document.getElementById('editHint').style.display='';
+    document.getElementById('confirmMsg').innerHTML='上記の完成イメージをもとに、enisuruチームが <b>実際の作品とキャプション</b>を一点ずつ手作業で制作し、お届けします。';
+    const author=val('cAuthor'),place=val('cPlace'),date=val('cDate'),body=val('cBody'),descr=val('cDescr');
+    document.getElementById('fcTitle').textContent=title;
+    const metaEl=document.getElementById('fcMeta');const ml=[];
+    if(author)ml.push('<div class="fc-meta-line">'+esc(author)+'</div>');
+    if(place)ml.push('<div class="fc-meta-line">'+esc(place)+'</div>');
+    if(date)ml.push('<div class="fc-meta-line">'+esc(date)+'</div>');
+    metaEl.innerHTML=ml.join('');
+    document.getElementById('fcBody').textContent=body;
+    document.getElementById('fcBody').style.display=body?'block':'none';
+    document.getElementById('fcRule').style.display=body?'block':'none';
+    const de=document.getElementById('fcDesc');
+    if(descr){de.textContent='— '+descr;de.style.display='block';}else de.style.display='none';
+    // 自動レイアウト判定：本文あり=物語 / 本文なし他あり=メタ / タイトルのみ=一言
+    const onlyTitle=!body&&!author&&!place&&!date&&!descr;
+    capEl.classList.toggle('titleonly',onlyTitle);
+  }
   // 写真（preview）と縦横
   const wrap=document.getElementById('fcPhotoWrap');
   wrap.style.paddingTop=(orient==='portrait')?'144%':'69.4%';
   const dispArt=artWatermarked||artSrc;
   if(dispArt)wrap.innerHTML='<img src="'+dispArt+'" onclick="openZoom(this.src)" style="cursor:zoom-in">';
   else wrap.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--green-pale);"><span class="serif" style="font-size:12px;letter-spacing:.3em;color:var(--green-soft);">e n i s u r u</span></div>';
-  // 背景色：生成色固定→主役色を提案
-  selColorIdx=2; document.getElementById('fcCap').style.background=COLOR_PALETTE[2].hex;
-  buildColorPicker();
-  if(artSrc)extractDominantColor(artSrc,rgb=>{const i=nearestPaletteIdx(rgb);/* 提案のみ：自動選択はせず初期は生成色 */});
+  // 背景色：生成色固定→主役色を提案（キャプションなしの場合は不要）
+  if(!noCap){
+    selColorIdx=2; capEl.style.background=COLOR_PALETTE[2].hex;
+    buildColorPicker();
+    if(artSrc)extractDominantColor(artSrc,rgb=>{const i=nearestPaletteIdx(rgb);/* 提案のみ：自動選択はせず初期は生成色 */});
+  }
   document.getElementById('s-final').classList.add('show');
-  requestAnimationFrame(()=>fitTitle());
+  if(!noCap)requestAnimationFrame(()=>fitTitle());
   document.getElementById('s-final').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -1093,6 +1168,7 @@ async function submitOrder(){
   const endpoint=GAS_ENDPOINT;
   const btn=document.getElementById('barBtn');btn.disabled=true;btn.textContent='送信しています...';
   const color=COLOR_PALETTE[selColorIdx];
+  const noCap=(captionMode==='no');
   const payload={
     action:'submitOrder',
     userName:val('userName'),email,phone,zip,address:addr,message:msg,
@@ -1100,9 +1176,10 @@ async function submitOrder(){
     emphasis:val('wEmphasis'),removeBg:val('wRemove'),otherWish:val('wOther'),
     snsConsent, style:'omokage',
     sku:selectedSku.key,
-    title:val('cTitle'),author:val('cAuthor'),place:val('cPlace'),date:val('cDate'),body:val('cBody'),descr:val('cDescr'),
-    interpretation,
-    colorName:color.name,colorHex:color.hex,colorNo:color.no,orientation:orient||'',
+    captionMode:noCap?'none':'with', hasCaption:!noCap,
+    title:noCap?'':val('cTitle'),author:noCap?'':val('cAuthor'),place:noCap?'':val('cPlace'),date:noCap?'':val('cDate'),body:noCap?'':val('cBody'),descr:noCap?'':val('cDescr'),
+    interpretation:noCap?'':interpretation,
+    colorName:noCap?'':color.name,colorHex:noCap?'':color.hex,colorNo:noCap?'':color.no,orientation:orient||'',
     submittedAt:new Date().toISOString()
   };
   try{
